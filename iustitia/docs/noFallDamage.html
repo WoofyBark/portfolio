@@ -88,7 +88,7 @@
 
       <section class="doc-section slide-in-bottom">
         <h2>Observer signature</h2>
-        <div class="sig">Landed-no-hurt on airborne-&gt;grounded transition: wasAirborne &amp;&amp; fallAccum &gt; threshold &amp;&amp; !soft &amp;&amp; tick - lastHurtTick &gt; 2; level = max(1, ceil((fallAccum-3)*2)). Spoof: onGroundPacket &amp;&amp; fallAccum &gt; threshold &amp;&amp; !isSolidBelow(0.5). Stair: ~-2.0 then ~0 dy cycles &gt;=3.</div>
+        <div class="sig">Landed-no-hurt on airborne-&gt;grounded touchdown (groundedProxy or feet reaching a surface): wasAirborne &amp;&amp; fallAccum &gt; threshold &amp;&amp; !soft &amp;&amp; tick - lastHurtTick &gt; 2; level = max(1, ceil((fallAccum-3)*2)). Spoof: onGroundPacket &amp;&amp; fallAccum &gt; threshold &amp;&amp; !isSolidBelow(0.5). Stair: ~-2.0 then ~0 dy cycles &gt;=3. No-damage burst (wind charge) re-bases fallAccum at the impulse&#x27;s own start and only descent below that floor accumulates. Mace smash (1.21): a confirmed descending mace attack (AttackEvent, swing + victim hurt) with fallAccum &gt; 1.5 re-bases fallAccum to 0, like vanilla&#x27;s fall-height reset -- the hurtless smash landing is judged on the ~2-block post-smash descent only.</div>
       </section>
 
       <section class="doc-section fade-in-scroll">
@@ -98,7 +98,9 @@
       <li>Teleport exempt (tick - lastTeleportTick &lt; 5)</li>
       <li>Soft-land exemption (WATER/SLIME_BLOCK/HAY_BLOCK/COBWEB)</li>
       <li>Hurt signal resets fallAccum and exempts the next landing</li>
+      <li>No-damage burst re-base: descent above the wind-charge launch floor never accumulates (a fall accrued below it still counts)</li>
       <li>Chunk not loaded -&gt; skip</li>
+      <li>Mace-smash re-base: a confirmed descending mace attack (swing + victim hurt, fallAccum &gt; 1.5) re-bases the accumulator -- a swing with no confirmed hit clears nothing (the evasion twin is covered by cheat-nofall-mace-evade)</li>
     </ul>
       </section>
 
@@ -139,7 +141,7 @@
         <a href="https://github.com/ThoriaDevelopment/Iustitia/releases/latest" target="_blank" rel="noopener">Releases</a>
       </div>
       <div class="footer-disclaimer">
-        v1.3.0 &middot; For Minecraft 1.21.11 (Fabric). Not affiliated with or endorsed by Mojang or Microsoft.
+        v1.4.0 &middot; For Minecraft 1.21.11 (Fabric). Not affiliated with or endorsed by Mojang or Microsoft.
         Minecraft is a trademark of Mojang Synergies AB. No telemetry, no outgoing packets &mdash; the mod only observes.
       </div>
     </div>

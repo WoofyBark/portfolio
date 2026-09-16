@@ -9,7 +9,7 @@
     { p: "> ", t: "iustitia --status", c: "" },
     { p: "",   t: "36 checks loaded across 4 groups", c: "ok" },
     { p: "",   t: "protocol: 1.21.11 + 1.8.9 combat ready", c: "ok" },
-    { p: "",   t: "12 keybinds · replay · sonar · clips", c: "dim" },
+    { p: "",   t: "13 keybinds · replay · clips", c: "dim" },
     { p: "",   t: "tracking 14 players on arch.mc", c: "dim" },
     { p: "",   t: "nametag tiers: 3 green, 1 yellow, 1 red", c: "dim" },
     { p: "> ", t: "flag reach thoria  dist=4.2  vl=5.0", c: "flag" },

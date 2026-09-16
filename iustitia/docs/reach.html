@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Reach &mdash; Iustitia checks</title>
-  <meta name="description" content="Lag-compensated reach — catches attackers hitting victims from beyond vanilla melee reach. Ported from Nemesis RangeA + Grim Reach.">
+  <meta name="description" content="Lag-compensated reach — catches attackers hitting victims from beyond vanilla melee reach. Ported from Nemesis RangeA + Grim Reach. Since v1.4.0 a motionless-pair branch also catches ghost reach: when neither attacker nor victim has moved, interpolation error is zero, so the check drops the ray and compares the vanilla metric (eye to closest point of the unexpanded hitbox) at a 3.2 ceiling — Koid-style 3.6 and LiquidBounce-style 4.2 ghost modules alert instead of passing as jitter.">
   <link rel="stylesheet" href="../assets/iustitia.css">
 </head>
 <body>
@@ -73,7 +73,7 @@
           <h1>Reach</h1>
           <span class="badge badge-def"><span class="glyph">[X]</span> Definitive</span>
         </div>
-        <div class="check-sub">Lag-compensated reach — catches attackers hitting victims from beyond vanilla melee reach. Ported from Nemesis RangeA + Grim Reach.</div>
+        <div class="check-sub">Lag-compensated reach — catches attackers hitting victims from beyond vanilla melee reach. Ported from Nemesis RangeA + Grim Reach. Since v1.4.0 a motionless-pair branch also catches ghost reach: when neither attacker nor victim has moved, interpolation error is zero, so the check drops the ray and compares the vanilla metric (eye to closest point of the unexpanded hitbox) at a 3.2 ceiling — Koid-style 3.6 and LiquidBounce-style 4.2 ghost modules alert instead of passing as jitter.</div>
         <div class="meta" style="margin-top:10px;color:var(--text-faint);font-family:var(--mono);font-size:13px">id: <span style="color:var(--accent)">reach</span> &nbsp;&middot;&nbsp; class: ReachCheck &nbsp;&middot;&nbsp; group: Combat</div>
       </div>
       <div class="doc-nav">
@@ -83,7 +83,7 @@
 
       <section class="doc-section fade-in-scroll">
         <h2>What it detects</h2>
-        <p>Lag-compensated reach — catches attackers hitting victims from beyond vanilla melee reach. Ported from Nemesis RangeA + Grim Reach.</p>
+        <p>Lag-compensated reach — catches attackers hitting victims from beyond vanilla melee reach. Ported from Nemesis RangeA + Grim Reach. Since v1.4.0 a motionless-pair branch also catches ghost reach: when neither attacker nor victim has moved, interpolation error is zero, so the check drops the ray and compares the vanilla metric (eye to closest point of the unexpanded hitbox) at a 3.2 ceiling — Koid-style 3.6 and LiquidBounce-style 4.2 ghost modules alert instead of passing as jitter.</p>
       </section>
 
       <section class="doc-section slide-in-bottom">
@@ -100,6 +100,7 @@
       <li>Pose-aware victim hitbox (sneak/prone/gliding)</li>
       <li>1.8 protocol widens hitbox margin by +0.1</li>
       <li>No-intercept only flagged when the nearest face genuinely exceeds reach (close-range misses dropped as inconclusive)</li>
+      <li>Motionless-pair branch requires both attacker and victim stationary; a moving pair is judged by the ray path only</li>
     </ul>
       </section>
 
@@ -141,7 +142,7 @@
         <a href="https://github.com/ThoriaDevelopment/Iustitia/releases/latest" target="_blank" rel="noopener">Releases</a>
       </div>
       <div class="footer-disclaimer">
-        v1.3.0 &middot; For Minecraft 1.21.11 (Fabric). Not affiliated with or endorsed by Mojang or Microsoft.
+        v1.4.0 &middot; For Minecraft 1.21.11 (Fabric). Not affiliated with or endorsed by Mojang or Microsoft.
         Minecraft is a trademark of Mojang Synergies AB. No telemetry, no outgoing packets &mdash; the mod only observes.
       </div>
     </div>

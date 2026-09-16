@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>KillAura &mdash; Iustitia checks</title>
-  <meta name="description" content="Unified killaura / silent-aim detector ported from Rain-Anticheat&#x27;s 1.8.9 KillauraCheck. Ten sub-components share one VL pool: heuristic(aim|constant|sync|gcd), pattern(snap), silent(snap|return|track), movement(fix|lock|sprint), consume, drift. Silent-aim swaps yaw/pitch only in look packets so the head visibly snaps onto enemies while the cheater&#x27;s screen never moves. Tier = CORROBORATOR (corroborates reach/criticals/etc., never initiates a tier alone).">
+  <meta name="description" content="Unified killaura / silent-aim detector ported from Rain-Anticheat&#x27;s 1.8.9 KillauraCheck. Thirteen sub-components share one VL pool: heuristic(aim|constant|sync|gcd), pattern(snap), silent(snap|return|track), movement(fix|lock|sprint), consume, drift. Silent-aim swaps yaw/pitch only in look packets so the head visibly snaps onto enemies while the cheater&#x27;s screen never moves. Tier = CORROBORATOR (corroborates reach/criticals/etc., never initiates a tier alone).">
   <link rel="stylesheet" href="../assets/iustitia.css">
 </head>
 <body>
@@ -73,7 +73,7 @@
           <h1>KillAura</h1>
           <span class="badge badge-inf"><span class="glyph">[!]</span> Inferential</span>
         </div>
-        <div class="check-sub">Unified killaura / silent-aim detector ported from Rain-Anticheat&#x27;s 1.8.9 KillauraCheck. Ten sub-components share one VL pool: heuristic(aim|constant|sync|gcd), pattern(snap), silent(snap|return|track), movement(fix|lock|sprint), consume, drift. Silent-aim swaps yaw/pitch only in look packets so the head visibly snaps onto enemies while the cheater&#x27;s screen never moves. Tier = CORROBORATOR (corroborates reach/criticals/etc., never initiates a tier alone).</div>
+        <div class="check-sub">Unified killaura / silent-aim detector ported from Rain-Anticheat&#x27;s 1.8.9 KillauraCheck. Thirteen sub-components share one VL pool: heuristic(aim|constant|sync|gcd), pattern(snap), silent(snap|return|track), movement(fix|lock|sprint), consume, drift. Silent-aim swaps yaw/pitch only in look packets so the head visibly snaps onto enemies while the cheater&#x27;s screen never moves. Tier = CORROBORATOR (corroborates reach/criticals/etc., never initiates a tier alone).</div>
         <div class="meta" style="margin-top:10px;color:var(--text-faint);font-family:var(--mono);font-size:13px">id: <span style="color:var(--accent)">killAura</span> &nbsp;&middot;&nbsp; class: KillAuraCheck &nbsp;&middot;&nbsp; group: Combat</div>
       </div>
       <div class="doc-nav">
@@ -83,7 +83,7 @@
 
       <section class="doc-section fade-in-scroll">
         <h2>What it detects</h2>
-        <p>Unified killaura / silent-aim detector ported from Rain-Anticheat&#x27;s 1.8.9 KillauraCheck. Ten sub-components share one VL pool: heuristic(aim|constant|sync|gcd), pattern(snap), silent(snap|return|track), movement(fix|lock|sprint), consume, drift. Silent-aim swaps yaw/pitch only in look packets so the head visibly snaps onto enemies while the cheater&#x27;s screen never moves. Tier = CORROBORATOR (corroborates reach/criticals/etc., never initiates a tier alone).</p>
+        <p>Unified killaura / silent-aim detector ported from Rain-Anticheat&#x27;s 1.8.9 KillauraCheck. Thirteen sub-components share one VL pool: heuristic(aim|constant|sync|gcd), pattern(snap), silent(snap|return|track), movement(fix|lock|sprint), consume, drift. Silent-aim swaps yaw/pitch only in look packets so the head visibly snaps onto enemies while the cheater&#x27;s screen never moves. Tier = CORROBORATOR (corroborates reach/criticals/etc., never initiates a tier alone).</p>
       </section>
 
       <section class="doc-section slide-in-bottom">
@@ -113,7 +113,7 @@
       <tbody>
         <tr><td>enabled</td><td class="val">true</td></tr>
         <tr><td>setbackVL</td><td class="val">5.0</td></tr>
-        <tr><td>decay</td><td class="val">0.05</td></tr>
+        <tr><td>decay</td><td class="val">0.1</td></tr>
         <tr><td>threshold</td><td class="val">0.0</td></tr>
         <tr class="const-row"><td>combat window</td><td class="val">70 ticks</td></tr>
         <tr class="const-row"><td>rotation window</td><td class="val">10</td></tr>
@@ -148,7 +148,7 @@
         <a href="https://github.com/ThoriaDevelopment/Iustitia/releases/latest" target="_blank" rel="noopener">Releases</a>
       </div>
       <div class="footer-disclaimer">
-        v1.3.0 &middot; For Minecraft 1.21.11 (Fabric). Not affiliated with or endorsed by Mojang or Microsoft.
+        v1.4.0 &middot; For Minecraft 1.21.11 (Fabric). Not affiliated with or endorsed by Mojang or Microsoft.
         Minecraft is a trademark of Mojang Synergies AB. No telemetry, no outgoing packets &mdash; the mod only observes.
       </div>
     </div>

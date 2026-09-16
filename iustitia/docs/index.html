@@ -79,7 +79,7 @@
         <div class="check-grid">
         <a class="check-card slide-in-bottom delay-1" href="reach.html">
           <div class="top"><span class="name">Reach</span><span class="badge badge-def"><span class="glyph">[X]</span> Definitive</span></div>
-          <div class="desc">Lag-compensated reach — catches attackers hitting victims from beyond vanilla melee reach. Ported from Nemesis RangeA + Grim Reach.</div>
+          <div class="desc">Lag-compensated reach — catches attackers hitting victims from beyond vanilla melee reach. Ported from Nemesis RangeA + Grim Reach. Since v1.4.0 a motionless-pair branch also catches ghost reach: when neither attacker nor victim has moved, interpolation error is zero, so the check drops the ray and compares the vanilla metric (eye to closest point of the unexpanded hitbox) at a 3.2 ceiling — Koid-style 3.6 and LiquidBounce-style 4.2 ghost modules alert instead of passing as jitter.</div>
         </a>
         <a class="check-card slide-in-bottom delay-2" href="multiTarget.html">
           <div class="top"><span class="name">MultiTarget</span><span class="badge badge-def"><span class="glyph">[X]</span> Definitive</span></div>
@@ -127,7 +127,7 @@
         </a>
         <a class="check-card slide-in-bottom delay-1" href="killAura.html">
           <div class="top"><span class="name">KillAura</span><span class="badge badge-inf"><span class="glyph">[!]</span> Inferential</span></div>
-          <div class="desc">Unified killaura / silent-aim detector ported from Rain-Anticheat&#x27;s 1.8.9 KillauraCheck. Ten sub-components share one VL pool: heuristic(aim|constant|sync|gcd), pattern(snap), silent(snap|return|track), movement(fix|lock|sprint), consume, drift. Silent-aim swaps yaw/pitch only in look packets so the head visibly snaps onto enemies while the cheater&#x27;s screen never moves. Tier = CORROBORATOR (corroborates reach/criticals/etc., never initiates a tier alone).</div>
+          <div class="desc">Unified killaura / silent-aim detector ported from Rain-Anticheat&#x27;s 1.8.9 KillauraCheck. Thirteen sub-components share one VL pool: heuristic(aim|constant|sync|gcd), pattern(snap), silent(snap|return|track), movement(fix|lock|sprint), consume, drift. Silent-aim swaps yaw/pitch only in look packets so the head visibly snaps onto enemies while the cheater&#x27;s screen never moves. Tier = CORROBORATOR (corroborates reach/criticals/etc., never initiates a tier alone).</div>
         </a>
         <a class="check-card slide-in-bottom delay-2" href="autoBlock.html">
           <div class="top"><span class="name">AutoBlock</span><span class="badge badge-def"><span class="glyph">[X]</span> Definitive</span></div>
@@ -219,7 +219,7 @@
         </a>
         <a class="check-card slide-in-bottom delay-3" href="aimWrap.html">
           <div class="top"><span class="name">AimWrap</span><span class="badge badge-inf"><span class="glyph">[!]</span> Inferential</span></div>
-          <div class="desc">Max-rotation-rate / snap detector — flags a single-tick yaw rotation larger than threshold (150deg) coming out of a near-still tick (previous wrapped delta &lt; 30deg): a classic aimbot snap from rest.</div>
+          <div class="desc">Max-rotation-rate / snap detector — flags a single-tick yaw rotation larger than threshold (165deg) coming out of a near-still tick (previous wrapped delta &lt; 30deg): a classic aimbot snap from rest.</div>
         </a>
         <a class="check-card slide-in-bottom delay-4" href="pitchBound.html">
           <div class="top"><span class="name">PitchBound</span><span class="badge badge-inf"><span class="glyph">[!]</span> Inferential</span></div>
@@ -254,7 +254,7 @@
         <a href="https://github.com/ThoriaDevelopment/Iustitia/releases/latest" target="_blank" rel="noopener">Releases</a>
       </div>
       <div class="footer-disclaimer">
-        v1.3.0 &middot; For Minecraft 1.21.11 (Fabric). Not affiliated with or endorsed by Mojang or Microsoft.
+        v1.4.0 &middot; For Minecraft 1.21.11 (Fabric). Not affiliated with or endorsed by Mojang or Microsoft.
         Minecraft is a trademark of Mojang Synergies AB. No telemetry, no outgoing packets &mdash; the mod only observes.
       </div>
     </div>

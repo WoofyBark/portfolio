@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Iustitia &mdash; client-sided Fabric anticheat for Minecraft 1.21.11</title>
-  <meta name="description" content="Iustitia is a free, open-source, client-sided Fabric anticheat for Minecraft 1.21.11. 36 read-only checks, lag-aware false-positive guards, in-game YACL config, nametag cheat-tier prefixes, and a full moderator suite &mdash; per-player chat history (/ius chathist) that captures decorated chat on rank servers, instant replay (/ius replay), directional sonar audio, portable evidence clips (/ius clip, /ius playclip), long recordings (/ius record), live side panels, player exemptions, and Phase B render overlays (watch follow-cam, target highlight, ghost trail, offender selfie). Zero outgoing packets, zero telemetry.">
+  <meta name="description" content="Iustitia is a free, open-source, client-sided Fabric anticheat for Minecraft 1.21.11. 36 read-only checks, lag-aware false-positive guards, in-game YACL config, nametag cheat-tier prefixes, and a full moderator suite &mdash; instant replay (/ius replay) with whole-scene clips (/ius clip, /ius playclip) that capture entities, block edits and the world around the action, long recordings (/ius record), live side panels, player exemptions, and render overlays (watch follow-cam, target highlight, offender selfie). Zero outgoing packets, zero telemetry.">
   <link rel="stylesheet" href="assets/iustitia.css">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect x='4' y='2' width='8' height='8' rx='1.5' transform='rotate(45 8 6)' fill='%238b5cf6'/%3E%3C/svg%3E">
 </head>
@@ -46,7 +46,7 @@
           <div class="line"><span class="prompt">&gt; </span>iustitia --status</div>
           <div class="line"><span class="ok">36 checks loaded across 4 groups</span></div>
           <div class="line"><span class="ok">protocol: 1.21.11 + 1.8.9 combat ready</span></div>
-          <div class="line"><span class="dim">keybinds: 12 binds · replay · sonar · clips</span></div>
+          <div class="line"><span class="dim">keybinds: 13 binds · replay · clips</span></div>
           <div class="line"><span class="dim">0 outgoing packets sent. 0 telemetry.</span></div>
         </div>
       </div>
@@ -67,32 +67,32 @@
     </div>
   </section>
 
-  <!-- What's new in 1.3 -->
+  <!-- What's new in 1.4 -->
   <section class="section whats-new" id="whats-new" style="padding-bottom:0">
     <div class="container">
-      <div class="section-label fade-in-scroll">What's new in 1.3</div>
-      <h2 class="section-title fade-in-scroll">Chat history, <span class="grad">live in the corner of your eye.</span></h2>
-      <p class="section-lead fade-in-scroll">v1.3 adds a per-player chat history that actually captures on the servers people play, plus live side panels and long recordings, so you can build a case without ever leaving the scene. Still read-only, still client-sided.</p>
+      <div class="section-label fade-in-scroll">What's new in 1.4</div>
+      <h2 class="section-title fade-in-scroll">Clips that capture <span class="grad">the whole scene.</span></h2>
+      <p class="section-lead fade-in-scroll">v1.4 reworks the replay/clip pipeline and lands a detection-accuracy pass: clips save instantly, capture the world around the action as it happens, and the last two known false positives are gone. Still read-only, still client-sided.</p>
       <div class="grid grid-4" style="margin-top:36px">
         <div class="card slide-in-bottom delay-1">
-          <div class="icon">💬</div>
-          <h3>Chat history</h3>
-          <p><code>/ius chathist &lt;player&gt;</code> keeps a per-player chat log and actually works where people play. Hypixel, ArchMC, Minemen and more all decorate chat with ranks, stars and suffixes; Iustitia parses past the decoration to recover the real sender and message. Search by player, by phrase, or both. Per-server, and it persists.</p>
+          <div class="icon">🧊</div>
+          <h3>No more clip-save freeze</h3>
+          <p>The world around a <code>/ius clip</code> used to be swept all at once when you saved, freezing the client on hundreds of chunk snapshots. It now rolls up in the background while the scene is live, so the command returns instantly. A window that spans a teleport records one segment per place, and replays show both.</p>
         </div>
         <div class="card slide-in-bottom delay-2">
-          <div class="icon">🪟</div>
-          <h3>Live side panels</h3>
-          <p><code>/ius transcript &lt;player&gt;</code> and <code>/ius chathist panel &lt;player&gt;</code> open a narrow overlay that stays open alongside the game (it never pauses). Watch a player's transcript or chat history refresh live while the fight keeps going underneath.</p>
+          <div class="icon">🐄</div>
+          <h3>Entities &amp; block edits</h3>
+          <p>Clips now capture the whole scene: nearby mobs, animals, boats and minecarts (drawn through their own vanilla models on replay), plus every block placed or broken during the window. Tunable in <code>/ius config</code> via <strong>Clip captures entities</strong>, <strong>Entity capture cap</strong>, <strong>Rolling world budget</strong> and <strong>New-segment distance</strong>.</p>
         </div>
         <div class="card slide-in-bottom delay-3">
-          <div class="icon">⏺</div>
-          <h3>Long recordings</h3>
-          <p><code>/ius record</code> captures beyond the 60-second instant-replay window, for the longer arcs where a cheater's pattern only shows over minutes. Auto-splits on a world or server change, and saves to the same portable <code>.iusclip</code> format you replay with <code>/ius playclip</code>.</p>
+          <div class="icon">🎞</div>
+          <h3>Clip format v13</h3>
+          <p>Per-segment worlds, block-edit deltas, entity capture, body/head yaw. Every older clip (v2–v12, including SnapClip) still plays. Clips saved by 1.4 can't be opened by older builds, so re-export one if you need to.</p>
         </div>
         <div class="card slide-in-bottom delay-4">
-          <div class="icon">🎞</div>
-          <h3>Replay &amp; clip polish</h3>
-          <p>Ghosts now carry their held item and armor, interpolate smoothly through slow-mo, and sync hurt, health and totem-pop so a playback reads like the live scene. A rebuilt chunk mesh keeps MODERN clip playback crisp without a frame cost.</p>
+          <div class="icon">⚔</div>
+          <h3>Detection &amp; FP pass</h3>
+          <p>Combat checks catch subtler cheats: a ghost-reach tier for close-range modules, a sustained-episode gate across the per-hit checks, and an occlusion fix for through-walls. A burst re-base keeps wind-charge jumps legal, and the last two known false positives (ladder climbs, water walking) are gone. New <strong>Replay toggle</strong> keybind (numpad *).</p>
         </div>
       </div>
     </div>
@@ -103,24 +103,19 @@
     <div class="container">
       <div class="section-label fade-in-scroll">The moderator suite</div>
       <h2 class="section-title fade-in-scroll">Moderation tools, <span class="grad">rendered in world.</span></h2>
-      <p class="section-lead fade-in-scroll">A full moderator suite &mdash; an instant-replay of the scene, eyes-free directional sonar, portable evidence clips, and player exemptions &mdash; turning raw detections into a moderation workflow. All still read-only and client-sided.</p>
-      <div class="grid grid-4" style="margin-top:36px">
+      <p class="section-lead fade-in-scroll">A moderator suite for the whole loop: an instant replay of the scene, portable evidence clips, and player exemptions. It turns a raw detection into something you can review and act on, and it stays read-only and client-sided throughout.</p>
+      <div class="grid grid-3" style="margin-top:36px">
         <div class="card slide-in-bottom delay-1">
           <div class="icon">🎬</div>
           <h3>Instant replay</h3>
           <p><code>/ius replay &lt;player&gt; &lt;sec&gt;</code> rewinds the last 60s and replays it in-world as translucent <em>humanoid ghost models</em> of every tracked player at their buffered positions. Scrub with <code>/ius replay pause|seek|step|speed</code>, switch cameras (free / follow / POV), or use the numpad keybinds &mdash; the live game keeps running underneath and snaps back the instant it stops.</p>
         </div>
         <div class="card slide-in-bottom delay-2">
-          <div class="icon">🔊</div>
-          <h3>Sonar audio</h3>
-          <p><code>/ius sonar</code> plays a directional note on every flushed alert &mdash; <strong>pan tells you the direction</strong>, <strong>pitch tells you the distance</strong>. Keep your eyes on the fight and just listen for cheats. Additive to chat, with its own volume, never a replacement.</p>
-        </div>
-        <div class="card slide-in-bottom delay-3">
           <div class="icon">📦</div>
           <h3>Evidence clips</h3>
           <p><code>/ius clip &lt;sec&gt; [name]</code> exports the last N seconds of positions + alerts to a portable <code>.iusclip</code> file. Play it back later with <code>/ius playclip</code> or browse, play, and delete from the <code>/ius clips</code> manager. An evidence clip, not just a screenshot &mdash; share the file with another moderator.</p>
         </div>
-        <div class="card slide-in-bottom delay-4">
+        <div class="card slide-in-bottom delay-3">
           <div class="icon">🚫</div>
           <h3>Player exemptions</h3>
           <p><code>/ius exempt &lt;name&gt;</code> skips a trusted player at the check chokepoint so they never flag &mdash; or <code>/ius clear &lt;name&gt;</code> wipes a bogus tier back to green. Exemptions persist across sessions and server hops, so a trusted regular stays exempt.</p>
@@ -144,7 +139,7 @@
         <div class="card slide-in-bottom delay-2">
           <div class="icon">⚔</div>
           <h3>36 checks, 4 groups</h3>
-          <p>Combat, movement, rotation, and packet checks &mdash; from lag-compensated reach and a ten-sub KillAura suite to blink/timer and silent-aim tracking.</p>
+          <p>Combat, movement, rotation, and packet checks &mdash; from lag-compensated reach and a thirteen-sub KillAura suite to blink/timer and silent-aim tracking.</p>
         </div>
         <div class="card slide-in-bottom delay-3">
           <div class="icon">〰</div>
@@ -185,7 +180,7 @@
     <div class="container">
       <div class="section-label fade-in-scroll">Philosophy</div>
       <h2 class="section-title fade-in-scroll">False-positive <span class="grad">reduction first.</span></h2>
-      <p class="section-lead fade-in-scroll">A client-sided anticheat that cries wolf is worse than none &mdash; you stop trusting the prefix. So Iustitia is tuned conservatively: 16 of 36 checks are <em>primary definitive</em> (their alert proves cheating), KillAura acts as a corroborator only, and the remaining 19 are inferential. Tiers require cross-check corroboration to reach red.</p>
+      <p class="section-lead fade-in-scroll">A client-sided anticheat that cries wolf is worse than none &mdash; you stop trusting the prefix. So Iustitia is tuned conservatively: 16 of 36 checks are <em>primary definitive</em> (an alert from one proves cheating), two more corroborate without ever marking a player on their own, and the remaining 18 are inferential. Tiers need cross-check corroboration to reach red.</p>
       <div class="pillars">
         <div class="pillar slide-in-left">
           <span class="num">01 / OBSERVE ONLY</span>
@@ -199,8 +194,8 @@
         </div>
         <div class="pillar slide-in-right">
           <span class="num">03 / CONSERVATIVE TIERS</span>
-          <h4>16 definitive + 1 corroborator, 19 inferential</h4>
-          <p>Only checks whose signature is impossible for a legit player are <span style="color:#f87171">primary definitive [X]</span>. KillAura is a corroborator &mdash; strong when it agrees with reach/criticals, but never marks a player alone. The rest are inferential and cannot push a tier to red.</p>
+          <h4>16 definitive + 2 corroborators, 18 inferential</h4>
+          <p>Only a check whose signature is impossible for a legit player is <span style="color:#f87171">primary definitive [X]</span>. KillAura and HitsWithoutSwing corroborate: they are strong when they agree with reach or criticals, and on their own they never mark a player. The remaining 18 are inferential and cannot push a tier to red.</p>
         </div>
       </div>
     </div>
