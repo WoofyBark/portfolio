@@ -96,8 +96,10 @@
     <ul>
       <li>Vehicle/swimming/gliding exempt</li>
       <li>Teleport exempt (tick - lastTeleportTick &lt; 5)</li>
+      <li>Server-lag exempt (shared lag + burst windows): a hitch injects a horizontal delta and dy jitter that would otherwise read as surface walking</li>
       <li>Waterlogged solid exempt by the !isSolidAt gate (frosted ice is solid)</li>
       <li>Lily pad at footY or footY+1, climbable at foot, or boat below -&gt; legit-support exemption</li>
+      <li>Body-in-liquid exempt: the block above the feet is also liquid, or the feet sit more than SURFACE_EPS (0.05) below the liquid top face, so a surface swimmer (whose tp.swimming stays false) is not read as standing on the water</li>
     </ul>
       </section>
 
@@ -113,6 +115,7 @@
         <tr><td>threshold</td><td class="val">1.0</td></tr>
         <tr class="const-row"><td>streak</td><td class="val">3 ticks</td></tr>
         <tr class="const-row"><td>|dy| gate</td><td class="val">0.1</td></tr>
+        <tr class="const-row"><td>SURFACE_EPS</td><td class="val">0.05</td></tr>
       </tbody>
     </table>
       </section>

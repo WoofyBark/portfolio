@@ -88,7 +88,7 @@
 
       <section class="doc-section slide-in-bottom">
         <h2>Observer signature</h2>
-        <div class="sig">Every tick raycasts eye-to-look against each nearby victim&#x27;s pose-aware hitbox (within 3.0 reach), recording the tick the crosshair FIRST reaches each victim&#x27;s hitbox (rising edge). onAttack classes a hit as &#x27;fast&#x27; when ev.tick - engagementStart is in 0..3. A 24-hit rolling window flags at level 1.0 only when fastCount &gt;= 4 AND total &gt;= 5 AND fastCount/total &gt;= 0.75.</div>
+        <div class="sig">Every tick raycasts eye-to-look against each nearby victim&#x27;s pose-aware hitbox (within 3.0 reach), recording the tick the crosshair FIRST reaches each victim&#x27;s hitbox (rising edge). onAttack classes a hit as &#x27;fast&#x27; when ev.tick - engagementStart is in 0..3. The clock starts only when the attacker&#x27;s own aim moved within the last 3 ticks, so an edge created by the victim strafing into a held crosshair is not a reaction and gets no clock. A 24-hit rolling window alerts once per episode at setbackVL + 1.0 when fastCount &gt;= threshold (4) AND total &gt;= 5 AND fastCount/total &gt;= 0.75, re-arming on a non-qualifying hit.</div>
       </section>
 
       <section class="doc-section fade-in-scroll">
@@ -99,6 +99,7 @@
       <li>Cheap distance pre-check (range^2 25.0)</li>
       <li>Pose-aware hitbox (avoid early rising edge on crouched victims)</li>
       <li>Chunk-unloaded-safe (no world query; near-origin pos never in reach -&gt; skipped)</li>
+      <li>Held-aim discriminator: an edge created by the victim moving into a stationary crosshair gets no engagement clock, so a legit player clicking a strafing target is not read as a sub-reaction (deliberately fail-open; a perfectly still user is left to KillAura/HitFlick)</li>
       <li>MAX_REACTION_TICKS=3 absorbs 0-2-tick reaction on both protocols; consistency gate absorbs the 3-4 tick ambiguous zone</li>
     </ul>
       </section>
@@ -115,6 +116,7 @@
         <tr><td>threshold</td><td class="val">4.0</td></tr>
         <tr class="const-row"><td>look reach</td><td class="val">3.0</td></tr>
         <tr class="const-row"><td>max reaction</td><td class="val">3 ticks</td></tr>
+        <tr class="const-row"><td>aim-turn window</td><td class="val">3 ticks</td></tr>
         <tr class="const-row"><td>min samples</td><td class="val">5</td></tr>
         <tr class="const-row"><td>window</td><td class="val">24 hits</td></tr>
         <tr class="const-row"><td>ratio</td><td class="val">0.75</td></tr>

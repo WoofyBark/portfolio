@@ -88,7 +88,7 @@
 
       <section class="doc-section slide-in-bottom">
         <h2>Observer signature</h2>
-        <div class="sig">Tracks per-tick victim UUID sets. Flags at sameTick &gt;= 2 (level = sameTick - 1); a second independent branch flags a 2-tick union of &gt;= 3 distinct victims when sameTick &lt; 2.</div>
+        <div class="sig">Tracks per-tick victim UUID sets. Three paths: the level path flags at sameTick &gt;= threshold (default 2) at level max(1.0, sameTick - 1); the pair path covers the documented two-target minimum with a TICK-keyed sustained gate, alerting once per episode at setbackVL + 1.0 when a same-tick pair repeats on &gt;= 2 of the last 4 ticks; and an independent lag-absorb path flags a 2-tick union of &gt;= threshold + 1 distinct victims, evaluated only when sameTick &lt; threshold so it can never double-count the same-tick evidence.</div>
       </section>
 
       <section class="doc-section fade-in-scroll">
@@ -96,6 +96,8 @@
     <ul>
       <li>Self-hurt and non-player victims filtered upstream by AttackInference</li>
       <li>Per-tick purge of tick-victim maps older than tick - 2</li>
+      <li>Pair path is tick-keyed, not event-keyed: a vanilla sword sweep damages the whole arc on one tick, so its packets count as one sample and a sweep no longer fills a gate whose whole point is repetition</li>
+      <li>Lag-absorb path is skipped when sameTick &gt;= threshold, so it is strictly additional evidence and never reduces the same-tick VL</li>
     </ul>
       </section>
 
@@ -109,8 +111,9 @@
         <tr><td>setbackVL</td><td class="val">2.0</td></tr>
         <tr><td>decay</td><td class="val">1.0</td></tr>
         <tr><td>threshold</td><td class="val">2.0</td></tr>
-        <tr class="const-row"><td>same-tick flag</td><td class="val">&gt;= 2 victims</td></tr>
-        <tr class="const-row"><td>2-tick union flag</td><td class="val">&gt;= 3 victims</td></tr>
+        <tr class="const-row"><td>same-tick flag</td><td class="val">&gt;= threshold (2) victims, level max(1.0, n - 1)</td></tr>
+        <tr class="const-row"><td>pair path</td><td class="val">a same-tick pair on &gt;= 2 of the last 4 ticks, one alert per episode at setbackVL + 1.0</td></tr>
+        <tr class="const-row"><td>2-tick union flag</td><td class="val">&gt;= threshold + 1 (3) victims, only when sameTick &lt; threshold</td></tr>
       </tbody>
     </table>
       </section>

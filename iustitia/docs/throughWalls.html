@@ -88,7 +88,7 @@
 
       <section class="doc-section slide-in-bottom">
         <h2>Observer signature</h2>
-        <div class="sig">On each AttackEvent, raycasts attacker-eye to victim-eye through the client world via WorldQueries.hasLineOfSight. A solid opaque block on the eye-level segment flags at level 1.0. Eye-to-eye (~1.62 both) so legit melee over fences/slabs (&lt;=1.5) is not flagged; only a &gt;=2-tall wall occludes.</div>
+        <div class="sig">On each AttackEvent, raycasts the attacker&#x27;s eye to three victim body points (eye / mid-torso / feet) through the client world via WorldQueries.hasLineOfSight, and records the hit as occluded only when all three are blocked. Keeps a rolling 12-hit window per attacker and flags once at least 3 verdicts are in and the occluded fraction reaches threshold (default 0.5). One alert per episode at setbackVL + 1.0; re-arms when the rate falls back under the ratio.</div>
       </section>
 
       <section class="doc-section fade-in-scroll">
@@ -96,8 +96,10 @@
     <ul>
       <li>Attacker-in-vehicle exempt</li>
       <li>Victim-in-vehicle exempt (passenger eye sits inside the vehicle frame)</li>
-      <li>Chunk-gated — a &#x27;blocked&#x27; verdict trusted only when both endpoint chunks are loaded</li>
-      <li>Non-opaque blocks (glass/leaves/ice/fences/panes/iron-bars) treated as line-of-sight</li>
+      <li>Chunk-gated — a &#x27;blocked&#x27; verdict trusted only when both endpoint chunks are loaded, and an unloaded-chunk hit is skipped rather than counted, so it cannot deflate the rate</li>
+      <li>Whole-body occlusion — all three body points must be blocked, so cover that leaves the feet or torso visible (fences, slabs, low walls) is not flagged</li>
+      <li>Match-rate gate (threshold 0.5 over a 12-hit window) instead of per-hit flagging, so one fragile verdict does not flag a legit player</li>
+      <li>Non-opaque blocks (glass/leaves/ice/fences/panes/iron-bars) treated as line-of-sight via isOpaqueFullCube</li>
     </ul>
       </section>
 
@@ -111,8 +113,9 @@
         <tr><td>setbackVL</td><td class="val">8.0</td></tr>
         <tr><td>decay</td><td class="val">0.5</td></tr>
         <tr><td>threshold</td><td class="val">0.5</td></tr>
-        <tr class="const-row"><td>ray</td><td class="val">attacker eye -&gt; victim eye</td></tr>
-        <tr class="const-row"><td>level</td><td class="val">1.0</td></tr>
+        <tr class="const-row"><td>ray</td><td class="val">attacker eye -&gt; victim eye / mid-torso / feet (all three must be blocked)</td></tr>
+        <tr class="const-row"><td>window</td><td class="val">12 hits, 3 minimum before the rate is trusted</td></tr>
+        <tr class="const-row"><td>level</td><td class="val">setbackVL + 1.0, one alert per episode</td></tr>
       </tbody>
     </table>
       </section>

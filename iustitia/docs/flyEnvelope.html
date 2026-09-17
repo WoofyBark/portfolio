@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fly &mdash; Iustitia checks</title>
-  <meta name="description" content="Flight envelope — three airborne signals while groundedProxy is false: physics breach, hover/AirWalk, and ascend-without-jump. Ported from AvA checkFlight + Nemesis FlyB.">
+  <meta name="description" content="Flight envelope — seven airborne sub-signals while groundedProxy is false: physics breach, hover/AirWalk, ascend-without-jump, and the four step-8 sub-signals (FlyB air-friction band, Blink midair freeze, AntiKick dip cadence, StrafeHop impulse), all sharing this VL pool. Ported from AvA checkFlight + Nemesis FlyB.">
   <link rel="stylesheet" href="../assets/iustitia.css">
 </head>
 <body>
@@ -73,7 +73,7 @@
           <h1>Fly</h1>
           <span class="badge badge-def"><span class="glyph">[X]</span> Definitive</span>
         </div>
-        <div class="check-sub">Flight envelope — three airborne signals while groundedProxy is false: physics breach, hover/AirWalk, and ascend-without-jump. Ported from AvA checkFlight + Nemesis FlyB.</div>
+        <div class="check-sub">Flight envelope — seven airborne sub-signals while groundedProxy is false: physics breach, hover/AirWalk, ascend-without-jump, and the four step-8 sub-signals (FlyB air-friction band, Blink midair freeze, AntiKick dip cadence, StrafeHop impulse), all sharing this VL pool. Ported from AvA checkFlight + Nemesis FlyB.</div>
         <div class="meta" style="margin-top:10px;color:var(--text-faint);font-family:var(--mono);font-size:13px">id: <span style="color:var(--accent)">flyEnvelope</span> &nbsp;&middot;&nbsp; class: FlyEnvelopeCheck &nbsp;&middot;&nbsp; group: Movement</div>
       </div>
       <div class="doc-nav">
@@ -83,12 +83,12 @@
 
       <section class="doc-section fade-in-scroll">
         <h2>What it detects</h2>
-        <p>Flight envelope — three airborne signals while groundedProxy is false: physics breach, hover/AirWalk, and ascend-without-jump. Ported from AvA checkFlight + Nemesis FlyB.</p>
+        <p>Flight envelope — seven airborne sub-signals while groundedProxy is false: physics breach, hover/AirWalk, ascend-without-jump, and the four step-8 sub-signals (FlyB air-friction band, Blink midair freeze, AntiKick dip cadence, StrafeHop impulse), all sharing this VL pool. Ported from AvA checkFlight + Nemesis FlyB.</p>
       </section>
 
       <section class="doc-section slide-in-bottom">
         <h2>Observer signature</h2>
-        <div class="sig">Physics breach: dy exceeds gravity-predicted (prevDeltaY-0.08)*0.98 by &gt; threshold (0.1) with recentDescend &lt; 0.5, sustained &gt;=2 ticks. Hover: |dy| &lt; 0.01 with horizontal &gt; 0.1 for &gt;=3 ticks. Ascend: dy &gt; 0.2 with no observed jump impulse within 2 ticks (jump impulse = prevDeltaY &lt; 0.15 &amp;&amp; dy &gt; 0.3 &amp;&amp; dy &lt; 1.0, debounced &gt;6 ticks).</div>
+        <div class="sig">Physics breach: dy exceeds gravity-predicted (prevDeltaY-0.08)*0.98 by &gt; threshold (0.1) with recentDescend &lt; 0.5, sustained &gt;=2 ticks. Hover: |dy| &lt; 0.01 with horizontal &gt; 0.1 for &gt;=3 ticks. Ascend: dy &gt; 0.2 with no observed jump impulse within 2 ticks (jump impulse = prevDeltaY &lt; 0.15 &amp;&amp; dy &gt; 0.3 &amp;&amp; dy &lt; 1.0, debounced &gt;6 ticks). Four more share the pool: Fly(FlyB) applies the Nemesis vertical air-friction kernel (prevDeltaY-0.08)*0.98 at a 0.05 tolerance, owning the 0.05-0.1 band the 0.1 breach misses, sustained &gt;= 4 ticks; Fly(Blink) is a pure midair full freeze (|delta|^2 &lt; 0.0001) held for blinkFreezeTicks (default 30, clamped 5..200); Fly(AntiKick) holds dy within +-0.05 of a hover point for &gt;= 40 ticks with periodic ~20-tick downward dips &lt;= 0.04; Fly(StrafeHop) counts repeated first-tick-jump dy inside a tight band around 0.40123128, &gt;= 5 times.</div>
       </section>
 
       <section class="doc-section fade-in-scroll">
@@ -96,8 +96,10 @@
     <ul>
       <li>Vehicle/gliding/riptide/swimming exempt</li>
       <li>Velocity window (tick - velocityTick &lt; 30)</li>
-      <li>Teleport exempt (clears descend window + hoverTicks)</li>
-      <li>Hurt exempt (tick - hurtTick &lt; 3)</li>
+      <li>Teleport exempt (tick - lastTeleportTick &lt; 10, clears the descend window + hoverTicks)</li>
+      <li>Hurt exempt (tick - hurtTick &lt; 6): the ~6-tick KB peak plus the residual upward drift after it is exactly what the 30-tick velocity window misses on servers that do not broadcast other-player velocity</li>
+      <li>Climbable at the feet clears all four streak counters: a climb up or down is not flight, and no partial streak survives the tick the player steps off</li>
+      <li>Server-lag exempt (shared lag + burst windows), and the sample is skipped rather than pushed, so a hitch cannot poison the &gt;=2-of-5 breach gate</li>
       <li>Solid block within 2 above head suppresses ascend (chunk unloaded -&gt; treated as blocked)</li>
       <li>Sustained-levitation guard infers Levitation (LEV_GUARD_TICKS=20) and stops accumulating</li>
     </ul>
@@ -117,6 +119,10 @@
         <tr class="const-row"><td>hover</td><td class="val">|dy|&lt;0.01, horiz&gt;0.1, 3 ticks</td></tr>
         <tr class="const-row"><td>LEV_RISE</td><td class="val">0.2</td></tr>
         <tr class="const-row"><td>LEV_GUARD_TICKS</td><td class="val">20</td></tr>
+        <tr class="const-row"><td>Fly(FlyB) band</td><td class="val">0.05-0.1, &gt;= 4 ticks</td></tr>
+        <tr class="const-row"><td>Fly(Blink)</td><td class="val">|d|^2 &lt; 0.0001 for blinkFreezeTicks (30, clamped 5..200)</td></tr>
+        <tr class="const-row"><td>Fly(AntiKick)</td><td class="val">+-0.05 of a hover point for &gt;= 40 ticks, ~20-tick dips &lt;= 0.04</td></tr>
+        <tr class="const-row"><td>Fly(StrafeHop)</td><td class="val">0.40123128 band, &gt;= 5 times</td></tr>
       </tbody>
     </table>
       </section>

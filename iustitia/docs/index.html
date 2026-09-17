@@ -87,7 +87,7 @@
         </a>
         <a class="check-card slide-in-bottom delay-3" href="clickStatistics.html">
           <div class="top"><span class="name">Autoclicker</span><span class="badge badge-inf"><span class="glyph">[!]</span> Inferential</span></div>
-          <div class="desc">Autoclicker via four independent signals on a swing: CPS, Robot (sub-10ms nano-delta), StDev (too-uniform intervals), and Kurtosis (near-uniform fixed-delay). Ported from Nemesis AutoClickerA-D.</div>
+          <div class="desc">Autoclicker via five independent signals on a swing: CPS, Robot (sub-10ms nano-delta), StDev (too-uniform intervals), Kurtosis (near-uniform fixed-delay), and Record (a non-constant periodic click loop). Ported from Nemesis AutoClickerA-D.</div>
         </a>
         <a class="check-card slide-in-bottom delay-4" href="throughWalls.html">
           <div class="top"><span class="name">ThroughWalls</span><span class="badge badge-def"><span class="glyph">[X]</span> Definitive</span></div>
@@ -107,7 +107,7 @@
         </a>
         <a class="check-card slide-in-bottom delay-4" href="noKnockback.html">
           <div class="top"><span class="name">NoKnockback</span><span class="badge badge-inf"><span class="glyph">[!]</span> Inferential</span></div>
-          <div class="desc">Anti-knockback / Velocity — cancels or scales the ~0.4 horizontal KB a sprint-hit applies so the victim barely moves. Nemesis VelocityA/B proxy.</div>
+          <div class="desc">Anti-knockback / Velocity — cancels, scales or redirects the KB a sprint-hit applies so the victim barely moves. One VL pool across four sub-signals: the VelocityC magnitude ratio, the absorbed-KB sustained gate, NoKB(VelocityB) vertical ratio, and NoKB(Vector) direction mismatch. Nemesis VelocityA/B/C proxy.</div>
         </a>
         <a class="check-card slide-in-bottom delay-1" href="keepSprint.html">
           <div class="top"><span class="name">KeepSprint</span><span class="badge badge-inf"><span class="glyph">[!]</span> Inferential</span></div>
@@ -153,7 +153,7 @@
         </a>
         <a class="check-card slide-in-bottom delay-2" href="flyEnvelope.html">
           <div class="top"><span class="name">Fly</span><span class="badge badge-def"><span class="glyph">[X]</span> Definitive</span></div>
-          <div class="desc">Flight envelope — three airborne signals while groundedProxy is false: physics breach, hover/AirWalk, and ascend-without-jump. Ported from AvA checkFlight + Nemesis FlyB.</div>
+          <div class="desc">Flight envelope — seven airborne sub-signals while groundedProxy is false: physics breach, hover/AirWalk, ascend-without-jump, and the four step-8 sub-signals (FlyB air-friction band, Blink midair freeze, AntiKick dip cadence, StrafeHop impulse), all sharing this VL pool. Ported from AvA checkFlight + Nemesis FlyB.</div>
         </a>
         <a class="check-card slide-in-bottom delay-3" href="spider.html">
           <div class="top"><span class="name">Spider</span><span class="badge badge-def"><span class="glyph">[X]</span> Definitive</span></div>

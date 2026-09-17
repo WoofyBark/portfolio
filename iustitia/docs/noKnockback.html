@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>NoKnockback &mdash; Iustitia checks</title>
-  <meta name="description" content="Anti-knockback / Velocity — cancels or scales the ~0.4 horizontal KB a sprint-hit applies so the victim barely moves. Nemesis VelocityA/B proxy.">
+  <meta name="description" content="Anti-knockback / Velocity — cancels, scales or redirects the KB a sprint-hit applies so the victim barely moves. One VL pool across four sub-signals: the VelocityC magnitude ratio, the absorbed-KB sustained gate, NoKB(VelocityB) vertical ratio, and NoKB(Vector) direction mismatch. Nemesis VelocityA/B/C proxy.">
   <link rel="stylesheet" href="../assets/iustitia.css">
 </head>
 <body>
@@ -73,7 +73,7 @@
           <h1>NoKnockback</h1>
           <span class="badge badge-inf"><span class="glyph">[!]</span> Inferential</span>
         </div>
-        <div class="check-sub">Anti-knockback / Velocity — cancels or scales the ~0.4 horizontal KB a sprint-hit applies so the victim barely moves. Nemesis VelocityA/B proxy.</div>
+        <div class="check-sub">Anti-knockback / Velocity — cancels, scales or redirects the KB a sprint-hit applies so the victim barely moves. One VL pool across four sub-signals: the VelocityC magnitude ratio, the absorbed-KB sustained gate, NoKB(VelocityB) vertical ratio, and NoKB(Vector) direction mismatch. Nemesis VelocityA/B/C proxy.</div>
         <div class="meta" style="margin-top:10px;color:var(--text-faint);font-family:var(--mono);font-size:13px">id: <span style="color:var(--accent)">noKnockback</span> &nbsp;&middot;&nbsp; class: NoKnockbackCheck &nbsp;&middot;&nbsp; group: Combat</div>
       </div>
       <div class="doc-nav">
@@ -83,12 +83,12 @@
 
       <section class="doc-section fade-in-scroll">
         <h2>What it detects</h2>
-        <p>Anti-knockback / Velocity — cancels or scales the ~0.4 horizontal KB a sprint-hit applies so the victim barely moves. Nemesis VelocityA/B proxy.</p>
+        <p>Anti-knockback / Velocity — cancels, scales or redirects the KB a sprint-hit applies so the victim barely moves. One VL pool across four sub-signals: the VelocityC magnitude ratio, the absorbed-KB sustained gate, NoKB(VelocityB) vertical ratio, and NoKB(Vector) direction mismatch. Nemesis VelocityA/B/C proxy.</p>
       </section>
 
       <section class="doc-section slide-in-bottom">
         <h2>Observer signature</h2>
-        <div class="sig">On AttackEvent records the hit tick + attacker yaw + attacker-sprinting into the victim&#x27;s context. process accumulates the victim&#x27;s horizontal displacement over a 3-tick post-hit window, then flags at level 1.0 if summed displacement &lt;= 0.1 despite a sprint-hit.</div>
+        <div class="sig">On AttackEvent records the hit tick, attacker yaw and attacker-sprinting into the victim&#x27;s context. process accumulates the victim&#x27;s horizontal displacement over a 3-tick post-hit window and flags at 1.0 when it falls under cfg.threshold (0.61) of the EXPECTED KB displacement (impulse x friction-integral, from VelocitySignal on broadcast-velocity servers or vanilla sprint-KB where it is not broadcast). The expected denominator is scaled by the observed fraction of the window, and by ATTACK_SLOWDOWN (0.6) for a hit inside the 2-tick i-frame window. A gate of 3 absorbed verdicts in the last 5 marks the ratio anti-KB sustained rather than a one-off. Two further branches share the pool: NoKB(VelocityB) flags a first-airborne dy / kbVy &lt; 0.995 (the victim never leaves the ground), and NoKB(Vector) flags a post-hit displacement direction off the attacker facing by more than 35 degrees.</div>
       </section>
 
       <section class="doc-section fade-in-scroll">
@@ -100,6 +100,9 @@
       <li>Server-lag exempt (tick - lastServerLagTick &lt;= 4 or lastLagBurstTick &lt;= 2)</li>
       <li>KB-dampening surface at feet exempt (liquid/cobweb/soul sand/honey)</li>
       <li>Wall in KB direction exempt (multi-band sweep)</li>
+      <li>Shield exempt: a player holding up a shield takes no sprint-KB in vanilla, so a legit blocker&#x27;s ~zero displacement never trips the ratio</li>
+      <li>VelocityB is gated on the victim being grounded at the hit: the launches-them-off-the-ground premise is undefined for an already-airborne victim, who contributes their own motion</li>
+      <li>VelocityB fails open where velocity is not broadcast (kbVy stays 0), and a first-airborne dy in the 0.38-0.46 band is exempt as an ambiguous vanilla jump</li>
     </ul>
       </section>
 
@@ -114,7 +117,11 @@
         <tr><td>decay</td><td class="val">1.0</td></tr>
         <tr><td>threshold</td><td class="val">0.61</td></tr>
         <tr class="const-row"><td>window</td><td class="val">3 ticks</td></tr>
-        <tr class="const-row"><td>min move</td><td class="val">0.1 blocks</td></tr>
+        <tr class="const-row"><td>ratio bar</td><td class="val">&lt; 0.61 of the expected KB displacement</td></tr>
+        <tr class="const-row"><td>sustained gate</td><td class="val">3 of the last 5 hits</td></tr>
+        <tr class="const-row"><td>i-frame scaling</td><td class="val">x0.6 for a hit within 2 ticks of the previous one</td></tr>
+        <tr class="const-row"><td>VelocityB</td><td class="val">dy/kbVy &lt; 0.995, jump band 0.38-0.46 exempt</td></tr>
+        <tr class="const-row"><td>Vector</td><td class="val">off attacker facing by &gt; 35 deg, pre-hit speed &lt; 0.05, min move 0.1</td></tr>
       </tbody>
     </table>
       </section>

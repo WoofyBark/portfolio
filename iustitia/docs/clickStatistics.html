@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Autoclicker &mdash; Iustitia checks</title>
-  <meta name="description" content="Autoclicker via four independent signals on a swing: CPS, Robot (sub-10ms nano-delta), StDev (too-uniform intervals), and Kurtosis (near-uniform fixed-delay). Ported from Nemesis AutoClickerA-D.">
+  <meta name="description" content="Autoclicker via five independent signals on a swing: CPS, Robot (sub-10ms nano-delta), StDev (too-uniform intervals), Kurtosis (near-uniform fixed-delay), and Record (a non-constant periodic click loop). Ported from Nemesis AutoClickerA-D.">
   <link rel="stylesheet" href="../assets/iustitia.css">
 </head>
 <body>
@@ -73,7 +73,7 @@
           <h1>Autoclicker</h1>
           <span class="badge badge-inf"><span class="glyph">[!]</span> Inferential</span>
         </div>
-        <div class="check-sub">Autoclicker via four independent signals on a swing: CPS, Robot (sub-10ms nano-delta), StDev (too-uniform intervals), and Kurtosis (near-uniform fixed-delay). Ported from Nemesis AutoClickerA-D.</div>
+        <div class="check-sub">Autoclicker via five independent signals on a swing: CPS, Robot (sub-10ms nano-delta), StDev (too-uniform intervals), Kurtosis (near-uniform fixed-delay), and Record (a non-constant periodic click loop). Ported from Nemesis AutoClickerA-D.</div>
         <div class="meta" style="margin-top:10px;color:var(--text-faint);font-family:var(--mono);font-size:13px">id: <span style="color:var(--accent)">clickStatistics</span> &nbsp;&middot;&nbsp; class: ClickStatisticsCheck &nbsp;&middot;&nbsp; group: Combat</div>
       </div>
       <div class="doc-nav">
@@ -83,12 +83,12 @@
 
       <section class="doc-section fade-in-scroll">
         <h2>What it detects</h2>
-        <p>Autoclicker via four independent signals on a swing: CPS, Robot (sub-10ms nano-delta), StDev (too-uniform intervals), and Kurtosis (near-uniform fixed-delay). Ported from Nemesis AutoClickerA-D.</p>
+        <p>Autoclicker via five independent signals on a swing: CPS, Robot (sub-10ms nano-delta), StDev (too-uniform intervals), Kurtosis (near-uniform fixed-delay), and Record (a non-constant periodic click loop). Ported from Nemesis AutoClickerA-D.</p>
       </section>
 
       <section class="doc-section slide-in-bottom">
         <h2>Observer signature</h2>
-        <div class="sig">CPS: swings in last 20 ticks &gt; threshold (20) -&gt; level 1. Robot: first nanoInterval &lt; 10ms AND second &lt; 50ms -&gt; level 2. StDev: populationStDev of last 40 intervals &lt; 0.45 -&gt; level 1. Kurtosis: excess kurtosis over a 600-sample window &lt; -0.7, fired once per episode at level setbackVL + 1.0. A swing relayed while the server has a dig live for that player is skipped for the cadence windows when its interval is &gt;= 2 ticks (as fast as a relay runs in vanilla), so a bedrock miner&#x27;s exactly-constant 4-tick stream no longer reads as a fixed-delay clicker. CPS still counts those swings.</div>
+        <div class="sig">CPS: swings in last 20 ticks &gt; threshold (20) -&gt; level 1. Robot: first nanoInterval &lt; 10ms AND second &lt; 50ms -&gt; level 2. StDev: populationStDev of last 40 intervals &lt; 0.45 -&gt; level 1. Kurtosis: excess kurtosis over a 600-sample window &lt; -0.7, fired once per episode at level setbackVL + 1.0. Record: detects a non-constant periodic loop in the last 60 tick intervals (the period must hold for &gt;= 5 cycles), fired once per episode at level setbackVL + 1.0 and re-arming after 20 consecutive non-loop intervals. A swing relayed while the server has a dig live for that player is skipped for the cadence windows when its interval is &gt;= 2 ticks (as fast as a relay runs in vanilla), so a bedrock miner&#x27;s exactly-constant 4-tick stream no longer reads as a fixed-delay clicker. CPS still counts those swings.</div>
       </section>
 
       <section class="doc-section fade-in-scroll">
@@ -115,6 +115,7 @@
         <tr class="const-row"><td>Robot</td><td class="val">&lt;10ms then &lt;50ms</td></tr>
         <tr class="const-row"><td>StDev bar</td><td class="val">&lt; 0.45 (40 samples)</td></tr>
         <tr class="const-row"><td>Kurtosis window</td><td class="val">600, bar -0.7</td></tr>
+        <tr class="const-row"><td>Record</td><td class="val">periodic loop over 60 intervals, &gt;= 5 cycles</td></tr>
       </tbody>
     </table>
       </section>

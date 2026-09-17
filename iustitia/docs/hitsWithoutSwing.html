@@ -88,7 +88,7 @@
 
       <section class="doc-section slide-in-bottom">
         <h2>Observer signature</h2>
-        <div class="sig">Subscribes SwingSignal (per-attacker lastSwingTick) + HurtSignal. On a melee hurt (STATUS/ENTITY_DAMAGE/DAMAGE_TILT; VELOCITY excluded) it attributes the hit to the tracked player the hurt names and to nobody else: a name resolving to no tracked player (mob, arrow, TNT) and a hurt naming nobody at all (fall, fire, drowning) both fail open. Only where the protocol cannot name causes (legacy 1.8-1.19.3) does it fall back to the nearest tracked player within 4 blocks that has a recent swing, and it fails open when nobody qualifies. If no attacker swing within ±2 ticks, increments a per-attacker noSwingCount; flags (level 1.0) at &gt;= threshold (3) no-swing hurts in 60 ticks, transition-gated one flag per episode.</div>
+        <div class="sig">Subscribes SwingSignal (per-attacker lastSwingTick) + HurtSignal. On a melee hurt (STATUS/ENTITY_DAMAGE/DAMAGE_TILT; VELOCITY excluded) it attributes the hit to the tracked player the hurt names and to nobody else: a name resolving to no tracked player (mob, arrow, TNT) and a hurt naming nobody at all (fall, fire, drowning) both fail open. Only where the protocol cannot name causes (legacy 1.8-1.19.3) does it fall back to the nearest tracked player within 4 blocks that has a recent swing, and it fails open when nobody qualifies. If no attacker swing within ±2 ticks, increments a per-attacker noSwingCount; flags at &gt;= threshold (3) no-swing hurts in 60 ticks, one alert per episode at setbackVL + 1.0 and re-arming when the no-swing hurts stop.</div>
       </section>
 
       <section class="doc-section fade-in-scroll">
@@ -116,7 +116,7 @@
         <tr class="const-row"><td>swing window</td><td class="val">±2 ticks</td></tr>
         <tr class="const-row"><td>melee range</td><td class="val">4 blocks (16 sq)</td></tr>
         <tr class="const-row"><td>episode</td><td class="val">60 ticks</td></tr>
-        <tr class="const-row"><td>flag level</td><td class="val">1.0 (corroborator)</td></tr>
+        <tr class="const-row"><td>flag level</td><td class="val">setbackVL + 1.0, one alert per episode (corroborator tier)</td></tr>
       </tbody>
     </table>
       </section>
