@@ -88,7 +88,7 @@
 
       <section class="doc-section slide-in-bottom">
         <h2>Observer signature</h2>
-        <div class="sig">CPS: swings in last 20 ticks &gt; threshold (20) -&gt; level 1. Robot: first nanoInterval &lt; 10ms AND second &lt; 50ms -&gt; level 2. StDev: populationStDev of last 40 intervals &lt; 0.45 -&gt; level 1. Kurtosis: excess kurtosis over a 600-sample window &lt; -0.7, fired once per episode at level setbackVL + 1.0.</div>
+        <div class="sig">CPS: swings in last 20 ticks &gt; threshold (20) -&gt; level 1. Robot: first nanoInterval &lt; 10ms AND second &lt; 50ms -&gt; level 2. StDev: populationStDev of last 40 intervals &lt; 0.45 -&gt; level 1. Kurtosis: excess kurtosis over a 600-sample window &lt; -0.7, fired once per episode at level setbackVL + 1.0. A swing relayed while the server has a dig live for that player is skipped for the cadence windows when its interval is &gt;= 2 ticks (as fast as a relay runs in vanilla), so a bedrock miner&#x27;s exactly-constant 4-tick stream no longer reads as a fixed-delay clicker. CPS still counts those swings.</div>
       </section>
 
       <section class="doc-section fade-in-scroll">
@@ -97,6 +97,7 @@
       <li>Same-tick swing batches (server/lag collapse) excluded from nano/stat windows</li>
       <li>Strict kurtosis bar (-0.7) excludes legit jitter/drag clicking</li>
       <li>Kurtosis transition gate fires once per episode, re-arms at kurt &gt;= -0.2</li>
+      <li>Server-relayed dig swings (&gt;= 2-tick interval) excluded from the StDev/Kurt/Record cadence windows, since the digger&#x27;s arm runs on the server&#x27;s clock, not theirs</li>
     </ul>
       </section>
 
