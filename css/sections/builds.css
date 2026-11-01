@@ -100,6 +100,18 @@
   outline-offset: 2px;
 }
 
+.project-nav {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* The arrows only drive the carousel, so they have nothing to do in the
+   stacked linear layout. */
+html:not(.is-scroll-path) .project-nav {
+  display: none;
+}
+
 .project-summary {
   font-size: 1rem;
   color: var(--mood-muted);
@@ -481,12 +493,41 @@ html.is-scroll-path [data-section="builds"] {
 }
 
 @media (max-width: 900px) {
-  .expand-header { grid-template-columns: 1fr; }
-  .expand-header .project-thumb { width: 120px; height: 120px; }
-  .expand-body .project-detail { grid-template-columns: 1fr; padding: 0 24px 40px; }
+  /* These overrides must outrank the .expand-card.is-open rules above. Those are
+     more specific than the plain .expand-header rule, so on a phone the open
+     header kept its 240px thumb column and 80px side padding: the text column
+     collapsed to 0px and every line was clipped in half. */
+  .expand-header,
+  .expand-card.is-open .expand-header {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 72px 20px 8px;
+  }
+
+  .expand-header .project-thumb,
+  .expand-card.is-open .expand-header .project-thumb {
+    width: 112px;
+    height: 112px;
+    padding: 12px;
+  }
+
+  .expand-card.is-open .expand-header .project-name {
+    font-size: clamp(2rem, 9vw, 2.6rem);
+  }
+
+  .expand-card.is-open .expand-header .project-summary {
+    max-width: none;
+    font-size: 1rem;
+  }
+
+  .expand-body .project-detail {
+    grid-template-columns: 1fr;
+    padding: 0 24px 48px;
+  }
 }
 
-/* Scroll-path category stage */
+/* Scroll-path project stage. One card is on screen at a time and the arrows
+   walk through all of them, so the number of projects is not baked in here. */
 html.is-scroll-path .builds-grid {
   position: relative;
   display: block;
@@ -499,32 +540,25 @@ html.is-scroll-path .builds-grid .project-card {
   position: absolute;
   left: 50%;
   top: 24px;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(18px) scale(0.985);
   width: min(960px, 100%);
   max-width: 100%;
   height: auto;
   max-height: calc(100% - 24px);
   overflow-y: auto;
   overflow-x: hidden;
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
   transition: opacity 0.55s cubic-bezier(0.2, 0.7, 0.2, 1),
               transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1);
-  pointer-events: none;
 }
 
-html.is-scroll-path .builds-grid.is-kleos .project-card:nth-child(1),
-html.is-scroll-path .builds-grid.is-iustitia .project-card:nth-child(2) {
+html.is-scroll-path .builds-grid .project-card.is-active {
   opacity: 1;
   transform: translateX(-50%) translateY(0) scale(1);
   z-index: 2;
   pointer-events: auto;
-}
-
-html.is-scroll-path .builds-grid.is-kleos .project-card:nth-child(2),
-html.is-scroll-path .builds-grid.is-iustitia .project-card:nth-child(1) {
-  opacity: 0;
-  transform: translateX(-50%) translateY(18px) scale(0.985);
-  z-index: 1;
-  pointer-events: none;
 }
 
 html.is-scroll-path .builds-grid .project-prev,

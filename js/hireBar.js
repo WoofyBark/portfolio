@@ -1,4 +1,4 @@
-const RESUME_PATH = 'Assets/About%20Me/Resume.txt';
+const RESUME_PATH = 'Assets/About%20Me/resume.txt';
 const RESUME_PDF_PATH = 'Assets/Thoria/Resume.pdf';
 
 const SECTION_PROGRESS = {
@@ -6,9 +6,9 @@ const SECTION_PROGRESS = {
   hero: 0,
   bio: 0.14,
   experience: 0.31,
-  builds: 0.64,
-  skills: 0.80,
-  contact: 0.98
+  builds: 0.52,
+  skills: 0.73,
+  contact: 0.90
 };
 
 function scrollPathTo(id) {

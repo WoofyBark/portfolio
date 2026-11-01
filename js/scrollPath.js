@@ -29,40 +29,56 @@ export function initScrollPath() {
   const skillsContent = sectionEls.skills?.querySelector('.track-content');
   const expContent = sectionEls.exp?.querySelector('.track-content');
 
-  // Waypoints are tuned so long reading phases (Experience, Builds, Skills)
-  // are stationary and centered while the user reads, with short transitions
-  // between them. The Builds cross-fade only swaps once the user has scrolled
-  // well into the section.
+  // Camera timeline. Every hold ends a little before the next waypoint so the
+  // panel is stationary while it is read, and the transition that follows is
+  // deliberately short:
+  //   0.00–0.11 hero hold          0.49–0.52 experience → builds
+  //   0.11–0.14 hero → bio         0.52–0.70 builds hold
+  //   0.14–0.28 bio hold           0.70–0.73 builds → skills
+  //   0.28–0.31 bio → experience   0.73–0.87 skills hold
+  //   0.31–0.49 experience hold    0.87–0.90 skills → contact
+  //                                0.90–1.00 contact hold
   const waypoints = [
-    { p: 0,    x: 0,      y: 0,      mood: 'hero' },
-    { p: 0.11, x: 0,      y: 0,      mood: 'hero' },
-    { p: 0.14, x: 0,      y: -100,   mood: 'bio' },
-    { p: 0.28, x: 0,      y: -100,   mood: 'bio' },
-    { p: 0.31, x: -100,   y: -100,   mood: 'exp' },
-    { p: 0.61, x: -100,   y: -100,   mood: 'exp' },
-    { p: 0.64, x: -200,   y: -100,   mood: 'builds' },
-    { p: 0.77, x: -200,   y: -100,   mood: 'builds' },
-    { p: 0.80, x: -200,   y: -200,   mood: 'skills' },
-    { p: 0.85, x: -200,   y: -200,   mood: 'skills' },
-    { p: 0.98, x: -300,   y: -200,   mood: 'contact' },
-    { p: 1,    x: -300,   y: -200,   mood: 'contact' }
+    { p: 0,    x: 0,    y: 0,    mood: 'hero' },
+    { p: 0.11, x: 0,    y: 0,    mood: 'hero' },
+    { p: 0.14, x: 0,    y: -100, mood: 'bio' },
+    { p: 0.28, x: 0,    y: -100, mood: 'bio' },
+    { p: 0.31, x: -100, y: -100, mood: 'exp' },
+    { p: 0.49, x: -100, y: -100, mood: 'exp' },
+    { p: 0.52, x: -200, y: -100, mood: 'builds' },
+    { p: 0.70, x: -200, y: -100, mood: 'builds' },
+    { p: 0.73, x: -200, y: -200, mood: 'skills' },
+    { p: 0.87, x: -200, y: -200, mood: 'skills' },
+    { p: 0.90, x: -300, y: -200, mood: 'contact' },
+    { p: 1,    x: -300, y: -200, mood: 'contact' }
   ];
 
   const phases = [
     { name: 'hero',  start: 0,    end: 0.14, direction: 'bottom' },
     { name: 'bio',   start: 0.14, end: 0.31, direction: 'right' },
-    { name: 'exp',   start: 0.31, end: 0.64, direction: 'right' },
-    { name: 'builds',start: 0.64, end: 0.80, direction: 'none' },
-    { name: 'skills',start: 0.80, end: 0.98, direction: 'bottom' },
-    { name: 'contact',start:0.98, end: 1,    direction: 'right' }
+    { name: 'exp',   start: 0.31, end: 0.52, direction: 'right' },
+    { name: 'builds',start: 0.52, end: 0.73, direction: 'none' },
+    { name: 'skills',start: 0.73, end: 0.90, direction: 'bottom' },
+    { name: 'contact',start:0.90, end: 1,    direction: 'right' }
   ];
 
-  const boundaries = [0.14, 0.31, 0.64, 0.80, 0.98];
+  const boundaries = [0.14, 0.31, 0.52, 0.73, 0.90];
   const snapThreshold = 0.04;
   const snapDelay = 900;
-  const buildsFadeBand = { start: 0.70, end: 0.74, kleosAnchor: 0.70, iustitiaAnchor: 0.73 };
-  const verticalDeadzone = 0.12;
-  const skillsHoldEnd = 0;
+
+  // Where the camera starts moving away from the two panels that scroll
+  // internally. Content scrolling must be finished (plus a readable dwell)
+  // before these points, or the panel is torn away mid-read.
+  const EXPERIENCE_HOLD = { start: 0.31, end: 0.49 };
+  const SKILLS_HOLD = { start: 0.73, end: 0.87 };
+  const BUILDS_START = 0.52;
+
+  // Pacing for those inner scrollers. The panels only overflow their box by
+  // ~150–200px, so mapping that across the whole hold meant thousands of pixels
+  // of wheel travel moved the content a few dozen pixels. They now advance at a
+  // bounded pace and then stay put for the rest of the hold.
+  const CONTENT_MIN_SPAN = 0.05; // progress used when the overflow is small
+  const CONTENT_DWELL = 0.03;    // progress held at the bottom before leaving
 
   function getTrackHeight() { return window.innerHeight * 8; }
 
@@ -115,52 +131,55 @@ export function initScrollPath() {
     window.dispatchEvent(new CustomEvent('cameratransition', { detail: { direction: dir } }));
   }
 
-  function dispatchBuildsCategory(category, direction) {
-    window.dispatchEvent(new CustomEvent('buildscategorychange', {
-      detail: { category, direction }
+  // Builds is a carousel. The camera only parks on the section; the arrows walk
+  // through every project card, and scroll never changes which one is showing.
+  const buildsGrid = sectionEls.builds?.querySelector('.builds-grid');
+  const buildCards = Array.from(buildsGrid?.querySelectorAll('.project-card') || []);
+  let buildsIndex = -1;
+  let buildsLocked = false;
+
+  function dispatchBuildsProject(index, direction) {
+    window.dispatchEvent(new CustomEvent('buildsprojectchange', {
+      detail: {
+        index,
+        project: buildCards[index]?.dataset.project || null,
+        direction,
+        source: 'scroll-path'
+      }
     }));
   }
 
-  // Event-driven category swap inside Builds: arrow buttons toggle between
-  // Kleos and Iustitia. Scroll only leaves the Builds section; it does not
-  // swap categories, but category changes are still dispatched as events.
-  let buildsCategory = 'kleos';
-  let buildsLocked = false;
-
-  function setBuildsCategory(category, direction) {
-    if (buildsCategory === category) return;
-    buildsCategory = category;
+  function setBuildsIndex(index, direction) {
+    if (!buildCards.length) return;
+    const next = ((index % buildCards.length) + buildCards.length) % buildCards.length;
+    if (next === buildsIndex) return;
+    buildsIndex = next;
     buildsLocked = true;
 
-    const grid = sectionEls.builds?.querySelector('.builds-grid');
-    if (grid) {
-      grid.classList.toggle('is-kleos', category === 'kleos');
-      grid.classList.toggle('is-iustitia', category === 'iustitia');
-      grid.classList.add('is-transitioning');
+    buildCards.forEach((card, i) => card.classList.toggle('is-active', i === next));
+    dispatchBuildsProject(next, direction);
+
+    setTimeout(() => { buildsLocked = false; }, 650);
+  }
+
+  // Every card carries a previous and a next arrow.
+  buildsGrid?.querySelectorAll('.project-prev, .project-next').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (buildsLocked) return;
+      const forward = btn.classList.contains('project-next');
+      setBuildsIndex(buildsIndex + (forward ? 1 : -1), forward ? 'next' : 'prev');
+    });
+  });
+
+  // The hero letters and anything else can ask for a specific project.
+  function onExternalProjectChange(e) {
+    if (e.detail?.source === 'scroll-path') return;
+    if (Number.isFinite(e.detail?.index)) {
+      setBuildsIndex(e.detail.index, e.detail.direction || 'external');
     }
-
-    dispatchBuildsCategory(category, direction);
-
-    setTimeout(() => {
-      buildsLocked = false;
-      grid?.classList.remove('is-transitioning');
-    }, 650);
   }
-
-  // Wire up arrow buttons in the Builds section.
-  const buildsGrid = sectionEls.builds?.querySelector('.builds-grid');
-  if (buildsGrid) {
-    const nextBtn = buildsGrid.querySelector('.project-next');
-    const prevBtn = buildsGrid.querySelector('.project-prev');
-    nextBtn?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (!buildsLocked) setBuildsCategory('iustitia', 'next');
-    });
-    prevBtn?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (!buildsLocked) setBuildsCategory('kleos', 'prev');
-    });
-  }
+  window.addEventListener('buildsprojectchange', onExternalProjectChange);
 
   function update() {
     const trackHeight = getTrackHeight();
@@ -180,49 +199,42 @@ export function initScrollPath() {
     currentY += (targetY - currentY) * lerpFactor;
     camera.style.transform = `translate(${currentX}vw, ${currentY}vh)`;
 
-    // Builds category state — now toggled with arrows inside the section.
-    // Scroll only changes the camera phase; it no longer swaps categories.
-    const buildsGrid = sectionEls.builds?.querySelector('.builds-grid');
-    if (buildsGrid && !buildsGrid.classList.contains('is-kleos') && !buildsGrid.classList.contains('is-iustitia')) {
-      buildsGrid.classList.add('is-kleos');
+    // First visit shows the first project; leaving upward resets to it so the
+    // section always starts on the same card when it is re-entered.
+    if (buildsIndex === -1) {
+      setBuildsIndex(0, 'init');
+    } else if (buildsIndex !== 0 && progress < BUILDS_START) {
+      setBuildsIndex(0, 'up');
     }
 
-    // Reset to Kleos when the user leaves Builds upward, so the section always
-    // starts on Kleos on re-entry.
-    if (buildsCategory !== 'kleos' && progress < buildsFadeBand.start) {
-      setBuildsCategory('kleos', 'up');
-    }
-
-    // Vertical-track internal scroll while camera is pinned.
-    // A deadzone at the top and bottom of the phase keeps the content still
-    // while the user is entering or leaving the section, so reading isn't
-    // interrupted by sudden content movement. The middle of the phase maps
-    // smoothly through the full content height.
-    function syncVerticalScroll(el, start, end) {
+    // Vertical-track internal scroll while the camera is pinned.
+    // The scroller is driven at roughly wheel speed, then rests at the bottom
+    // for the remainder of the hold (cameraMove - start - CONTENT_DWELL), so the
+    // end of the content — the last reference card, the server IPs — is readable
+    // before the camera moves on instead of being yanked away.
+    function syncVerticalScroll(el, start, cameraMove) {
       if (!el) return;
       const maxScroll = el.scrollHeight - el.clientHeight;
       if (maxScroll <= 0) return;
-      if (progress >= start && progress <= end) {
-        const p = (progress - start) / (end - start);
-        let q;
-        if (p < verticalDeadzone) {
-          q = 0;
-        } else if (p > 1 - verticalDeadzone) {
-          q = 1;
-        } else {
-          q = (p - verticalDeadzone) / (1 - 2 * verticalDeadzone);
-        }
-        const eased = q * q * (3 - 2 * q);
-        el.scrollTop = eased * maxScroll;
-      } else if (progress < start) {
+
+      const scrollPx = Math.max(1, getTrackHeight() - window.innerHeight);
+      const avail = Math.max(0.01, cameraMove - start - CONTENT_DWELL);
+      const needed = maxScroll / scrollPx;
+      const end = start + Math.min(avail, Math.max(needed, CONTENT_MIN_SPAN));
+
+      if (progress <= start) {
         el.scrollTop = 0;
-      } else if (progress > end) {
-        el.scrollTop = maxScroll;
+        return;
       }
+      if (progress >= end) {
+        el.scrollTop = maxScroll;
+        return;
+      }
+      el.scrollTop = ((progress - start) / (end - start)) * maxScroll;
     }
 
-    syncVerticalScroll(expContent, 0.31, 0.64);
-    syncVerticalScroll(skillsContent, 0.80, 0.92);
+    syncVerticalScroll(expContent, EXPERIENCE_HOLD.start, EXPERIENCE_HOLD.end);
+    syncVerticalScroll(skillsContent, SKILLS_HOLD.start, SKILLS_HOLD.end);
 
     const phase = getPhase(progress);
     if (phase && phase.name !== lastPhase) {
@@ -244,9 +256,9 @@ export function initScrollPath() {
     const dy = window.scrollY - lastScrollY;
     const maxScroll = getTrackHeight() - window.innerHeight;
     const longPhases = [
-      { name: 'experience', start: 0.31, end: 0.64 },
-      { name: 'builds',     start: 0.64, end: 0.80 },
-      { name: 'skills',     start: 0.80, end: 0.98 }
+      { name: 'experience', start: 0.31, end: 0.52 },
+      { name: 'builds',     start: 0.52, end: 0.73 },
+      { name: 'skills',     start: 0.73, end: 0.90 }
     ];
 
     // Inside a long reading phase: only snap when the user is clearly leaving
@@ -254,13 +266,8 @@ export function initScrollPath() {
     // and read anywhere inside the section.
     for (const ph of longPhases) {
       if (progress >= ph.start && progress <= ph.end) {
-        // At the very end of Skills/References, require the user to scroll
-        // deeper (past the last reference card hold) before snapping to Contact.
-        const effectiveEnd = ph.name === 'skills'
-          ? ph.end - skillsHoldEnd
-          : ph.end;
+        const effectiveEnd = ph.end;
         const distStart = Math.abs(progress - ph.start);
-        const distEnd = Math.abs(progress - effectiveEnd);
         if (distStart <= snapThreshold && dy < -0.5) {
           const target = Math.max(0, ph.start - snapThreshold - 0.015);
           doSnap(target * maxScroll);
@@ -268,16 +275,6 @@ export function initScrollPath() {
         }
         if (progress > effectiveEnd && dy > 0.5) {
           const target = Math.min(1, ph.end + snapThreshold + 0.015);
-          doSnap(target * maxScroll);
-          return;
-        }
-
-        // Builds category snap: never let the user rest between the two
-        // category anchors. Snap to whichever project is currently active.
-        if (ph.name === 'builds' && progress > buildsFadeBand.start && progress < buildsFadeBand.end) {
-          const target = buildsCategory === 'kleos'
-            ? Math.max(ph.start + 0.01, buildsFadeBand.kleosAnchor)
-            : Math.min(ph.end - 0.01, buildsFadeBand.iustitiaAnchor);
           doSnap(target * maxScroll);
           return;
         }
@@ -366,9 +363,9 @@ export function initScrollPath() {
     hero: 0,
     bio: 0.14,
     experience: 0.31,
-    builds: 0.64,
-    skills: 0.80,
-    contact: 0.98
+    builds: 0.52,
+    skills: 0.73,
+    contact: 0.90
   };
 
   function onNavClick(e) {
@@ -399,6 +396,7 @@ export function initScrollPath() {
     window.removeEventListener('scroll', onScroll, { passive: true });
     window.removeEventListener('resize', onResize);
     window.removeEventListener('thoria-autoscroll', onExternalAutoScroll);
+    window.removeEventListener('buildsprojectchange', onExternalProjectChange);
     navLinks.forEach(link => link.removeEventListener('click', onNavClick));
     if (typeof revealObserver === 'function') {
       revealObserver();

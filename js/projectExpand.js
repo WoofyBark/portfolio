@@ -1,20 +1,8 @@
-function getActiveBuildsCategory() {
-  const stage = document.querySelector('.builds-grid');
-  if (!stage) return 'kleos';
-  return stage.classList.contains('is-iustitia') ? 'iustitia' : 'kleos';
-}
-
 function isVisibleBuildCard(card) {
+  // Outside the scroll path every card sits in normal flow, so all of them can
+  // be opened. Inside it only the card currently on the carousel can be.
   if (!document.documentElement.classList.contains('is-scroll-path')) return true;
-  const stage = card.closest('.builds-grid');
-  if (!stage) return true;
-  const cards = Array.from(stage.querySelectorAll('.project-card'));
-  const idx = cards.indexOf(card);
-  if (idx === -1) return true;
-  const category = getActiveBuildsCategory();
-  if (idx === 0) return category === 'kleos';
-  if (idx === 1) return category === 'iustitia';
-  return true;
+  return card.classList.contains('is-active');
 }
 
 function setBuildsOpen(isOpen) {
@@ -22,7 +10,7 @@ function setBuildsOpen(isOpen) {
 }
 
 function getRect(el) {
-  return el.getBoundingClientRect();
+  return el ? el.getBoundingClientRect() : null;
 }
 
 function readCssVar(el, name) {
@@ -34,6 +22,8 @@ function prefersReducedMotion() {
 }
 
 function setFlip(el, from, to, scale = true) {
+  // Cards without artwork have no thumbnail to flip.
+  if (!el || !from || !to) return;
   const dx = from.left - to.left;
   const dy = from.top - to.top;
   let transform = `translate(${dx}px, ${dy}px)`;
@@ -48,6 +38,7 @@ function setFlip(el, from, to, scale = true) {
 }
 
 function clearFlip(el) {
+  if (!el) return;
   el.style.transform = '';
   el.style.transformOrigin = '';
   el.style.transition = '';
@@ -59,6 +50,7 @@ export function initProjectExpand() {
 
   let activeCard = null;
   let isOpen = false;
+  let closeTimer = null;
 
   function buildOverlayContent(card) {
     const name = card.querySelector('.project-name')?.innerHTML || '';
@@ -70,6 +62,9 @@ export function initProjectExpand() {
     const thumbSrc = thumb?.getAttribute('src') || '';
     const thumbAlt = thumb?.getAttribute('alt') || '';
     const detailHtml = detail?.outerHTML || '';
+    const thumbHtml = thumbSrc
+      ? `<img class="project-thumb" src="${thumbSrc}" alt="${thumbAlt}" width="160" height="160" loading="lazy" decoding="async">`
+      : '';
 
     return `
       <div class="expand-frame" aria-hidden="true">
@@ -90,7 +85,7 @@ export function initProjectExpand() {
             <p class="project-summary">${summary}</p>
             <div class="project-tags">${tags}</div>
           </div>
-          <img class="project-thumb" src="${thumbSrc}" alt="${thumbAlt}" width="160" height="160" loading="lazy" decoding="async">
+          ${thumbHtml}
         </div>
         <div class="expand-body">
           ${detailHtml}
@@ -101,6 +96,9 @@ export function initProjectExpand() {
 
   function openCard(card) {
     if (isOpen) return;
+    // Cancel the pending close cleanup so it cannot wipe the card we are about
+    // to build (reopening during the 420ms close fade).
+    if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
     activeCard = card;
     isOpen = true;
 
@@ -128,62 +126,91 @@ export function initProjectExpand() {
       left: overlay.querySelector('.expand-line--left'),
     };
 
-    // Position the card exactly over the source card.
-    expandCard.style.position = 'absolute';
-    expandCard.style.left = `${cardRect.left}px`;
-    expandCard.style.top = `${cardRect.top}px`;
-    expandCard.style.width = `${cardRect.width}px`;
-    expandCard.style.height = `${cardRect.height}px`;
+    // The close button must work on every path, including reduced motion.
+    closeBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeOverlay();
+    });
+
+    const revealBody = () => expandBody.classList.add('is-revealed');
+
+    const fullscreen = {
+      left: 0,
+      top: 0,
+      width: window.innerWidth,
+      height: window.innerHeight,
+      right: window.innerWidth,
+      bottom: window.innerHeight
+    };
+
+    function placeCard(rect) {
+      expandCard.style.position = 'absolute';
+      expandCard.style.left = `${rect.left}px`;
+      expandCard.style.top = `${rect.top}px`;
+      expandCard.style.width = `${rect.width}px`;
+      expandCard.style.height = `${rect.height}px`;
+    }
+
+    function placeLines(rect) {
+      lines.top.style.left = `${rect.left}px`;
+      lines.top.style.top = `${rect.top}px`;
+      lines.top.style.width = `${rect.width}px`;
+      lines.top.style.height = '1px';
+
+      lines.bottom.style.left = `${rect.left}px`;
+      lines.bottom.style.top = `${rect.bottom - 1}px`;
+      lines.bottom.style.width = `${rect.width}px`;
+      lines.bottom.style.height = '1px';
+
+      lines.left.style.left = `${rect.left}px`;
+      lines.left.style.top = `${rect.top}px`;
+      lines.left.style.width = '1px';
+      lines.left.style.height = `${rect.height}px`;
+
+      lines.right.style.left = `${rect.right - 1}px`;
+      lines.right.style.top = `${rect.top}px`;
+      lines.right.style.width = '1px';
+      lines.right.style.height = `${rect.height}px`;
+    }
+
+    // Start exactly over the source card.
+    placeCard(cardRect);
+    placeLines(cardRect);
     expandCard.style.borderRadius = readCssVar(card, '--radius') || '16px';
 
-    // Position blueprint lines along the card edges.
-    lines.top.style.left = `${cardRect.left}px`;
-    lines.top.style.top = `${cardRect.top}px`;
-    lines.top.style.width = `${cardRect.width}px`;
-    lines.top.style.height = '1px';
-
-    lines.bottom.style.left = `${cardRect.left}px`;
-    lines.bottom.style.top = `${cardRect.bottom - 1}px`;
-    lines.bottom.style.width = `${cardRect.width}px`;
-    lines.bottom.style.height = '1px';
-
-    lines.left.style.left = `${cardRect.left}px`;
-    lines.left.style.top = `${cardRect.top}px`;
-    lines.left.style.width = '1px';
-    lines.left.style.height = `${cardRect.height}px`;
-
-    lines.right.style.left = `${cardRect.right - 1}px`;
-    lines.right.style.top = `${cardRect.top}px`;
-    lines.right.style.width = '1px';
-    lines.right.style.height = `${cardRect.height}px`;
-
-    // Activate the fullscreen header layout immediately so we can measure where
-    // the title, summary, tags, and thumb will end up.
+    // Activate the fullscreen header layout so its final geometry is measurable.
     expandCard.classList.add('is-open');
-
     setBuildsOpen(true);
 
     if (reduced) {
       overlay.classList.add('is-visible', 'is-open');
-      expandCard.style.left = '0';
-      expandCard.style.top = '0';
-      expandCard.style.width = '100vw';
-      expandCard.style.height = '100vh';
+      placeCard(fullscreen);
+      placeLines(fullscreen);
       expandCard.style.borderRadius = '0';
-      expandBody.classList.add('is-revealed');
+      revealBody();
       return;
     }
 
     overlay.classList.add('is-visible');
 
-    // Force reflow so the initial positions are committed.
+    // Measure the header elements in the real fullscreen layout, then put the
+    // card back over the source card so the grow can animate out of it.
+    // Measuring while the card was still thumbnail-sized produced wrong FLIP
+    // offsets, which is what made the expansion look like it jumped.
+    expandCard.style.transition = 'none';
+    placeCard(fullscreen);
+    expandCard.style.borderRadius = '0';
     void expandCard.offsetWidth;
 
-    // Measure where header elements will be in fullscreen layout.
     const toName = getRect(expandName);
     const toSummary = getRect(expandSummary);
     const toTags = getRect(expandTags);
     const toThumb = getRect(expandThumb);
+
+    placeCard(cardRect);
+    expandCard.style.borderRadius = readCssVar(card, '--radius') || '16px';
+    void expandCard.offsetWidth;
+    expandCard.style.transition = '';
 
     const fromName = getRect(name);
     const fromSummary = getRect(summary);
@@ -221,21 +248,18 @@ export function initProjectExpand() {
         clearFlip(expandTags);
         clearFlip(expandThumb);
 
-        // Reveal body text after the frame finishes expanding.
+        // Reveal body text after the frame finishes expanding, with a timer as
+        // a safety net so the body is never left hidden if the transition is
+        // skipped (background tab, interrupted paint, effect downgrade).
         const onTransitionEnd = (e) => {
           if (e.propertyName === 'width' && e.target === expandCard) {
             expandCard.removeEventListener('transitionend', onTransitionEnd);
-            expandBody.classList.add('is-revealed');
+            revealBody();
           }
         };
         expandCard.addEventListener('transitionend', onTransitionEnd);
+        setTimeout(revealBody, 900);
       });
-    });
-
-    // Close handlers.
-    closeBtn?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      closeOverlay();
     });
   }
 
@@ -246,7 +270,11 @@ export function initProjectExpand() {
     overlay.classList.remove('is-open');
     overlay.classList.remove('is-visible');
     overlay.setAttribute('aria-hidden', 'true');
-    setTimeout(() => {
+    // openCard() cancels this: reopening inside the fade used to wipe the newly
+    // built overlay, leaving an empty panel with no fullscreen card.
+    if (closeTimer) clearTimeout(closeTimer);
+    closeTimer = setTimeout(() => {
+      closeTimer = null;
       overlay.innerHTML = '';
       activeCard = null;
     }, 420);

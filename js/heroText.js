@@ -3,8 +3,8 @@ import { getCapabilities } from './utils.js';
 const LETTER_TARGETS = {
   T: { section: 'bio', category: null, label: 'Bio', short: 'Bio' },
   H: { section: 'experience', category: null, label: 'Experience', short: 'Experience' },
-  O: { section: 'builds', category: 'kleos', label: 'Kleos', short: 'Kleos' },
-  R: { section: 'builds', category: 'iustitia', label: 'Iustitia', short: 'Iustitia' },
+  O: { section: 'builds', project: 'kleos', label: 'Kleos', short: 'Kleos' },
+  R: { section: 'builds', project: 'iustitia', label: 'Iustitia', short: 'Iustitia' },
   I: { section: 'skills', category: null, label: 'Skills', short: 'Skills' },
   A: { section: 'contact', category: null, label: 'Contact', short: 'Contact' }
 };
@@ -14,9 +14,9 @@ function navigateFromHero(target) {
     hero: 0,
     bio: 0.14,
     experience: 0.31,
-    builds: 0.64,
-    skills: 0.80,
-    contact: 0.98
+    builds: 0.52,
+    skills: 0.73,
+    contact: 0.90
   };
 
   // Match the scroll-path track height exactly so the destination aligns with
@@ -32,15 +32,14 @@ function navigateFromHero(target) {
     detail: { duration: 1100 }
   }));
 
-  if (target.section === 'builds' && target.category) {
-    const grid = document.querySelector('.builds-grid');
-    if (grid) {
-      grid.classList.toggle('is-kleos', target.category === 'kleos');
-      grid.classList.toggle('is-iustitia', target.category === 'iustitia');
+  if (target.section === 'builds' && target.project) {
+    const cards = Array.from(document.querySelectorAll('.builds-grid .project-card'));
+    const index = cards.findIndex(card => card.dataset.project === target.project);
+    if (index >= 0) {
+      window.dispatchEvent(new CustomEvent('buildsprojectchange', {
+        detail: { index, project: target.project, direction: 'hero' }
+      }));
     }
-    window.dispatchEvent(new CustomEvent('buildscategorychange', {
-      detail: { category: target.category, direction: 'hero' }
-    }));
   }
 
   window.scrollTo({ top: dest, behavior: 'smooth' });
@@ -61,7 +60,9 @@ export function initHeroText() {
 
   const chars = Array.from(rgbText.querySelectorAll('.rgb-char'));
 
-  if (!caps.isMinimal) {
+  // Guard the animation library: if the CDN fails to load, throw away the
+  // inline hidden state rather than throwing out of boot().
+  if (!caps.isMinimal && typeof anime !== 'undefined') {
     anime({
       targets: chars,
       opacity: [0, 1],

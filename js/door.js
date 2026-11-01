@@ -49,7 +49,7 @@ export function initDoor(options) {
   buildTextWall();
 
   // If reduced motion, skip the wall and reveal hero immediately.
-  if (caps.prefersReducedMotion) {
+  if (caps.reduced) {
     door.classList.add('is-active', 'is-revealing', 'is-opening');
     setTimeout(() => {
       door.classList.remove('is-active', 'is-revealing', 'is-opening');
