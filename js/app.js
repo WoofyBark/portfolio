@@ -91,6 +91,7 @@ function boot() {
   let destroyScrollPath = null;
 
   const stopLoaderEffects = initLoader(() => {
+    const loader = document.getElementById('loader');
     // Wait for the user's first scroll before opening the door.
     // The loader stays visible as the red/magenta intro screen.
     let doorOpened = false;
@@ -100,7 +101,6 @@ function boot() {
       window.removeEventListener('wheel', openDoor, { passive: true });
       window.removeEventListener('keydown', onKeyDown);
 
-      const loader = document.getElementById('loader');
       stopLoaderEffects();
 
       // Keep the loader fully visible until the door has covered it, then swap
