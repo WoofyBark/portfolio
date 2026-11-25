@@ -30,7 +30,7 @@ function projectCard(repo, index) {
     : '<p>This is a public repository on my GitHub profile. Open the repository to explore its source, documentation, and development history.</p>';
 
   return `
-    <article class="project-card reveal" data-project="github-${escapeHtml(repo.name)}">
+    <article class="project-card reveal" data-project="${escapeHtml(repo.name.toLowerCase())}">
       <div class="project-header" data-project-toggle role="button" tabindex="0" aria-expanded="false">
         <div class="project-title-block">
           <div class="project-title-row">
@@ -120,6 +120,7 @@ async function refreshPortfolio() {
       projects.innerHTML = '<p>No public repositories are available to feature yet.</p>';
       status.textContent = 'No eligible public repositories found.';
       renderSkills(repositories);
+      document.dispatchEvent(new CustomEvent('github-projects-updated'));
       return;
     }
 
@@ -135,6 +136,7 @@ async function refreshPortfolio() {
     status.textContent = 'GitHub projects are temporarily unavailable. Please try again later.';
     renderSkills([]);
     projects.innerHTML = '<p>Projects could not be loaded right now. Visit <a href="https://github.com/WoofyBark" target="_blank" rel="noopener noreferrer">GitHub</a> to browse public repositories.</p>';
+    document.dispatchEvent(new CustomEvent('github-projects-updated'));
   }
 }
 
