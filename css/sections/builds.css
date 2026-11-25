@@ -574,3 +574,32 @@ html.is-scroll-path .builds-grid .project-card::-webkit-scrollbar-thumb {
   background: var(--mood-border-2);
   border-radius: 3px;
 }
+
+
+.projects-intro {
+  color: var(--mood-muted);
+  max-width: 760px;
+  line-height: 1.6;
+  margin: 0 0 18px;
+}
+.projects-status {
+  margin: 0 0 18px;
+  color: var(--mood-muted);
+}
+.project-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mood-text);
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: 2.2rem;
+  background: linear-gradient(135deg, var(--mood-surface-2), var(--mood-bg-2));
+  border: 1px solid var(--mood-border);
+}
+.bio-location {
+  margin-top: 24px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
