@@ -134,7 +134,7 @@ export function initScrollPath() {
   // Builds is a carousel. The camera only parks on the section; the arrows walk
   // through every project card, and scroll never changes which one is showing.
   const buildsGrid = sectionEls.builds?.querySelector('.builds-grid');
-  const buildCards = Array.from(buildsGrid?.querySelectorAll('.project-card') || []);
+  let buildCards = Array.from(buildsGrid?.querySelectorAll('.project-card') || []);
   let buildsIndex = -1;
   let buildsLocked = false;
 
@@ -162,15 +162,28 @@ export function initScrollPath() {
     setTimeout(() => { buildsLocked = false; }, 650);
   }
 
-  // Every card carries a previous and a next arrow.
-  buildsGrid?.querySelectorAll('.project-prev, .project-next').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (buildsLocked) return;
-      const forward = btn.classList.contains('project-next');
-      setBuildsIndex(buildsIndex + (forward ? 1 : -1), forward ? 'next' : 'prev');
-    });
+  // Use delegated controls because GitHub project cards are inserted asynchronously.
+  buildsGrid?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.project-prev, .project-next');
+    if (!btn || !buildsGrid.contains(btn)) return;
+    e.stopPropagation();
+    if (buildsLocked) return;
+    const forward = btn.classList.contains('project-next');
+    setBuildsIndex(buildsIndex + (forward ? 1 : -1), forward ? 'next' : 'prev');
   });
+
+  function syncBuildCards() {
+    const previousProject = buildCards[buildsIndex]?.dataset.project;
+    buildCards = Array.from(buildsGrid?.querySelectorAll('.project-card') || []);
+    buildsIndex = -1;
+    if (!buildCards.length) return;
+    const preferredIndex = previousProject
+      ? buildCards.findIndex(card => card.dataset.project === previousProject)
+      : -1;
+    setBuildsIndex(preferredIndex >= 0 ? preferredIndex : 0, 'refresh');
+  }
+
+  document.addEventListener('github-projects-updated', syncBuildCards);
 
   // The hero letters and anything else can ask for a specific project.
   function onExternalProjectChange(e) {
@@ -397,6 +410,7 @@ export function initScrollPath() {
     window.removeEventListener('resize', onResize);
     window.removeEventListener('thoria-autoscroll', onExternalAutoScroll);
     window.removeEventListener('buildsprojectchange', onExternalProjectChange);
+    document.removeEventListener('github-projects-updated', syncBuildCards);
     navLinks.forEach(link => link.removeEventListener('click', onNavClick));
     if (typeof revealObserver === 'function') {
       revealObserver();
