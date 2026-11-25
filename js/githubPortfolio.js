@@ -41,6 +41,10 @@ function projectCard(repo, index) {
         </div>
         <div class="project-thumb project-placeholder" aria-hidden="true">${escapeHtml(repo.name.slice(0, 2).toUpperCase())}</div>
       </div>
+      <nav class="project-nav" aria-label="Project navigation">
+        <button class="project-prev" type="button" aria-label="Previous project"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+        <button class="project-next" type="button" aria-label="Next project"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+      </nav>
       <div class="project-body">
         <div class="project-body-inner">
           <div class="project-detail">
@@ -105,6 +109,7 @@ async function refreshPortfolio() {
     });
     if (!response.ok) throw new Error(`GitHub returned ${response.status}`);
     const repositories = await response.json();
+    if (!Array.isArray(repositories)) throw new Error('GitHub returned an unexpected repository response.');
 
     const eligible = repositories
       .filter(repo => !repo.archived && repo.size > 0 && repo.name.toLowerCase() !== 'portfolio')
@@ -128,9 +133,8 @@ async function refreshPortfolio() {
   } catch (error) {
     console.error('Unable to load GitHub portfolio:', error);
     status.textContent = 'GitHub projects are temporarily unavailable. Please try again later.';
-    if (!projects.children.length) {
-      projects.innerHTML = '<p>Projects could not be loaded right now. Visit <a href="https://github.com/WoofyBark" target="_blank" rel="noopener noreferrer">GitHub</a> to browse public repositories.</p>';
-    }
+    renderSkills([]);
+    projects.innerHTML = '<p>Projects could not be loaded right now. Visit <a href="https://github.com/WoofyBark" target="_blank" rel="noopener noreferrer">GitHub</a> to browse public repositories.</p>';
   }
 }
 
