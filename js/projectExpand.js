@@ -280,24 +280,31 @@ export function initProjectExpand() {
     }, 420);
   }
 
-  document.querySelectorAll('[data-project-toggle]').forEach(header => {
-    const card = header.closest('.project-card');
-    if (!card) return;
+  function bindProjectCards(root = document) {
+    root.querySelectorAll('[data-project-toggle]').forEach(header => {
+      if (header.dataset.projectExpandBound === 'true') return;
+      const card = header.closest('.project-card');
+      if (!card) return;
+      header.dataset.projectExpandBound = 'true';
 
-    header.addEventListener('click', () => {
-      if (!isVisibleBuildCard(card)) return;
-      const grid = card.closest('.builds-grid');
-      if (grid?.classList.contains('is-transitioning')) return;
-      openCard(card);
-    });
+      header.addEventListener('click', () => {
+        if (!isVisibleBuildCard(card)) return;
+        const grid = card.closest('.builds-grid');
+        if (grid?.classList.contains('is-transitioning')) return;
+        openCard(card);
+      });
 
-    header.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        header.click();
-      }
+      header.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          header.click();
+        }
+      });
     });
-  });
+  }
+
+  bindProjectCards();
+  document.addEventListener('github-projects-updated', () => bindProjectCards());
 
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && document.documentElement.classList.contains('is-builds-open')) {
