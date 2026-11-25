@@ -296,3 +296,30 @@ html:not(.is-scroll-path) [data-section="contact"] {
 @media (max-width: 720px) {
   .contact-form-wrap { padding: 24px; }
 }
+
+.legal-footer {
+  width: min(var(--maxw), 92vw);
+  margin: 34px auto 0;
+  padding: 18px 0 24px;
+  border-top: 1px solid var(--mood-border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  color: var(--mood-muted);
+  font-family: var(--mono);
+  font-size: .68rem;
+}
+
+.legal-footer a {
+  color: var(--mood-text);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.legal-footer a:hover,
+.legal-footer a:focus-visible {
+  color: var(--mood-accent);
+}
+
