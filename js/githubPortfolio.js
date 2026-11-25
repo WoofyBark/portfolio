@@ -75,7 +75,7 @@ function renderSkills(repositories) {
   const totals = new Map();
   for (const repo of repositories) {
     if (!repo.language) continue;
-    totals.set(repo.language, (totals.get(repo.language) || 0) + (repo.size || 0));
+    totals.set(repo.language, (totals.get(repo.language) || 0) + 1);
   }
   const languages = [...totals.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
   const cards = [
@@ -83,7 +83,7 @@ function renderSkills(repositories) {
     { title: 'Open-source development', description: 'Publishing public repositories and building software that others can inspect and use.' },
     ...languages.map(([language, size]) => ({
       title: language,
-      description: `Detected across public repositories · ${formatSize(size)} combined repository size.`
+      description: `Primary language in ${size} public repositor${size === 1 ? 'y' : 'ies'}.`
     }))
   ];
   target.innerHTML = cards.map(card => `
