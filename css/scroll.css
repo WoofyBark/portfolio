@@ -222,3 +222,71 @@ html.is-reduced-motion .scroll-hint,
 html:not(.is-scroll-path) .scroll-hint {
   animation: none;
 }
+
+/* Mobile/tablet safety fallback: never leave the portfolio on a blank camera
+   canvas when touch devices skip the desktop scroll-path experience. */
+@media (max-width: 980px) {
+  html:not(.is-scroll-path) body {
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  html:not(.is-scroll-path) #viewport {
+    position: relative;
+    inset: auto;
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 100svh;
+    overflow: visible;
+  }
+
+  html:not(.is-scroll-path) #camera {
+    position: relative;
+    inset: auto;
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 100svh;
+    transform: none !important;
+    overflow: visible;
+  }
+
+  html:not(.is-scroll-path) [data-section] {
+    position: relative;
+    inset: auto;
+    display: flex;
+    width: 100%;
+    min-height: 100svh;
+    height: auto;
+    visibility: visible;
+    opacity: 1;
+    overflow: visible;
+  }
+
+  html:not(.is-scroll-path) [data-section="hero"] {
+    min-height: 100svh;
+    justify-content: center;
+    padding: 100px 0 120px;
+  }
+
+  html:not(.is-scroll-path) .track-content,
+  html:not(.is-scroll-path) .vertical-track .track-content {
+    max-height: none;
+    overflow: visible;
+  }
+
+  html:not(.is-scroll-path) .reveal {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+  }
+
+  html:not(.is-scroll-path) .hero-rgb .rgb-char {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+  }
+}
+
