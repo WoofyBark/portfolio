@@ -290,3 +290,85 @@ html:not(.is-scroll-path) .scroll-hint {
   }
 }
 
+/* Hard mobile layout override. This intentionally does not depend on the
+   is-scroll-path class: that class may be left behind if the desktop camera
+   engine is skipped or interrupted during startup. */
+@media (max-width: 980px) {
+  html, body {
+    width: 100%;
+    min-height: 100%;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  #viewport {
+    position: relative !important;
+    inset: auto !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100svh;
+    overflow: visible !important;
+  }
+
+  #camera {
+    position: relative !important;
+    inset: auto !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100svh;
+    transform: none !important;
+    overflow: visible !important;
+  }
+
+  [data-section] {
+    position: relative !important;
+    inset: auto !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    display: flex !important;
+    width: 100% !important;
+    min-height: 100svh !important;
+    height: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+    padding: 112px 0 120px;
+  }
+
+  [data-section="hero"] {
+    min-height: 100svh !important;
+    justify-content: center !important;
+    padding: 100px 0 120px !important;
+  }
+
+  .track-content,
+  .vertical-track .track-content {
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .reveal,
+  .reveal.visible {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+  }
+
+  .hero-rgb .rgb-char {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+  }
+
+  .door,
+  #door,
+  .door-overlay {
+    display: none !important;
+  }
+}
+
