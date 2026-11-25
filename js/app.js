@@ -15,6 +15,7 @@ import { initServerStatus } from './serverStatus.js';
 import { initContactTicket } from './contactTicket.js';
 import { initCopyChips } from './copyChips.js';
 import { initHireBar } from './hireBar.js';
+import { initGithubPortfolio } from './githubPortfolio.js';
 
 const SCROLL_PATH_MIN_WIDTH = 980;
 
@@ -69,6 +70,7 @@ function boot() {
   initServerStatus();
   initContactTicket();
   initHireBar();
+  initGithubPortfolio();
   initFaq();
   initProjectExpand();
   initHeroText();
