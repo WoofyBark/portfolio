@@ -13,6 +13,7 @@
 }
 
 .project-card {
+  position: relative;
   border: 1px solid var(--mood-border);
   border-radius: var(--radius);
   background: linear-gradient(180deg, var(--mood-surface-2), var(--mood-surface));
@@ -100,10 +101,14 @@
   outline-offset: 2px;
 }
 
-.project-nav {
+ .project-nav {
   display: flex;
   gap: 8px;
   margin-left: auto;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 4;
 }
 
 /* The arrows only drive the carousel, so they have nothing to do in the
